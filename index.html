@@ -1,0 +1,1130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive 3D site model of Angels Knoll (Bunker Hill Parcel Y-1), Los Angeles: history, title records and stakeholders.">
+<style>html,body{margin:0;height:100%}body{font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Angels Knoll Site Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: full-height stylized 3D diorama on the left, dossier panel on the right; stacks on phones.
+   The 3D scene has its own day (light theme) and dusk (dark theme) lighting; the UI uses the tokens below. */
+:root{
+  --bg:#eef2f6; --panel:#fbfcfd; --ink:#1c2430; --muted:#5b6878; --line:#d5dde6;
+  --accent:#2f6fe0; --accent-soft:#e2ecfd; --gold:#c08a1a; --gold-soft:#fbf1da;
+  --gone:#8a5a3c; --gone-soft:#f4e8de; --hud:rgba(251,252,253,.86); --c-vote:#2f6fe0; --c-money:#178a5b; --c-culture:#8a4fd0;
+  --is-dark:0;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#10141b; --panel:#161b24; --ink:#e8edf3; --muted:#9aa7b6; --line:#2a3240;
+  --accent:#7fa8ff; --accent-soft:#1f2c4a; --gold:#f0c060; --gold-soft:#3a2f17;
+  --gone:#e0b08e; --gone-soft:#3a2a20; --hud:rgba(22,27,36,.82); --c-vote:#7fa8ff; --c-money:#4fd39a; --c-culture:#c39bff; --is-dark:1; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#10141b; --panel:#161b24; --ink:#e8edf3; --muted:#9aa7b6; --line:#2a3240;
+  --accent:#7fa8ff; --accent-soft:#1f2c4a; --gold:#f0c060; --gold-soft:#3a2f17;
+  --gone:#e0b08e; --gone-soft:#3a2a20; --hud:rgba(22,27,36,.82); --c-vote:#7fa8ff; --c-money:#4fd39a; --c-culture:#c39bff; --is-dark:1; color-scheme:dark;}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55}
+*{box-sizing:border-box}
+a{color:var(--accent);text-decoration:none;word-break:break-word}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 420px;height:100%;min-height:0}
+.stage{position:relative;min-width:0;min-height:0;overflow:hidden;background:#e4e9ee}
+#gl{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#gl.hovering{cursor:pointer}
+.hud{position:absolute;left:16px;top:14px;right:16px;display:flex;justify-content:space-between;gap:12px;pointer-events:none;flex-wrap:wrap}
+.plate{background:var(--hud);border:1px solid var(--line);border-radius:10px;padding:8px 12px;backdrop-filter:blur(8px);box-shadow:0 6px 20px rgba(20,40,80,.12)}
+.brand h1{font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:-.01em;margin:0;line-height:1.1}
+.brand p{margin:2px 0 0;font-family:var(--f-mono);font-size:11px;color:var(--muted);letter-spacing:.04em}
+.yearbox{text-align:right}
+.yearbig{font-family:var(--f-display);font-weight:800;font-size:38px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.yearcap{font-size:12px;color:var(--muted);max-width:280px;margin-left:auto}
+.controls{position:absolute;left:16px;right:16px;bottom:14px;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lab{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+#year{flex:1;min-width:140px;accent-color:var(--accent)}
+.presets{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:inherit;font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:3px 9px;border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.check{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+.check input{accent-color:var(--accent)}
+.note-sm{font-size:11.5px;color:var(--muted)}
+#tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;font-weight:500;padding:3px 9px;border-radius:6px;white-space:nowrap;transform:translate(12px,-30px)}
+.panel{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;min-width:0;min-height:0;display:flex;flex-direction:column}
+.picker{padding:14px 18px 12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.picker h2{font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.grp{display:flex;flex-wrap:wrap;gap:5px;align-items:baseline}
+.grp .gl{font-size:11px;color:var(--muted);width:100%;letter-spacing:.03em}
+.chip{font:inherit;font-size:12px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:1px 9px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip.dim{opacity:.5}
+.dossier{padding:16px 18px 28px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.kicker{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.25);display:inline-block}
+.dossier h3{font-family:var(--f-display);font-weight:700;font-size:24px;line-height:1.15;margin:0;text-wrap:balance}
+.dossier .en{color:var(--muted);font-size:13px;margin-top:-6px}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:11.5px;padding:1px 8px;border-radius:4px;border:1px solid transparent}
+.p-now{color:var(--accent);background:var(--accent-soft)}
+.p-gone{color:var(--gone);background:var(--gone-soft)}
+.p-hist{color:var(--ink);border-color:var(--line)}
+.p-plan{color:var(--gold);background:var(--gold-soft)}
+dl.facts{display:grid;grid-template-columns:104px minmax(0,1fr);gap:6px 12px;margin:0;font-size:13px}
+dl.facts dt{color:var(--muted)}
+dl.facts dd{margin:0;min-width:0}
+.mono{font-family:var(--f-mono);font-size:12.5px}
+.dossier p{margin:0;max-width:65ch}
+.dossier h4{font-size:13px;margin:6px 0 0;font-weight:600}
+ul.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+ul.tl li{display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px}
+ul.tl b{font-family:var(--f-mono);font-weight:600;font-size:12px;font-variant-numeric:tabular-nums}
+ul.docs{margin:0;padding-left:18px;font-size:13px;display:flex;flex-direction:column;gap:4px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{font:inherit;font-size:13px;background:none;border:0;border-bottom:2px solid transparent;padding:4px 8px;color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.callout{font-size:12.5px;background:var(--gold-soft);color:var(--ink);padding:8px 10px;border-radius:6px}
+.src{font-size:12px;color:var(--muted)}
+.modesw{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;align-self:flex-start}
+.seg{font:inherit;font-size:13px;font-weight:600;background:transparent;color:var(--muted);border:0;padding:5px 14px;cursor:pointer}
+.seg+.seg{border-left:1px solid var(--line)}
+.seg[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.lede{color:var(--muted)}
+.pmap{margin:0;display:flex;flex-direction:column;gap:4px}
+.pmap svg{width:100%;height:auto;display:block}
+.pmap .ax{font:500 10px var(--f-mono);fill:var(--muted)}
+.pmap .dl{font:600 10px var(--f-body);fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:3px}
+.pmap .dot{cursor:pointer}
+.pmap .dot:focus{outline:none}.pmap .dot:focus circle{stroke-width:4}
+.pmap figcaption{font-size:11px;color:var(--muted)}
+.shs{display:flex;flex-direction:column;gap:6px}
+.shs h4{display:flex;align-items:center;gap:8px;font-size:14px}
+.cnt{font:600 11px var(--f-mono);color:var(--muted)}
+.shl{display:flex;flex-direction:column;gap:6px}
+.shc{font:inherit;text-align:left;display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--cc);border-radius:6px;padding:7px 10px;cursor:pointer;color:var(--ink)}
+.shc:hover{border-color:var(--cc)}
+.shc .t{display:flex;flex-direction:column;min-width:0;font-size:12.5px}
+.shc .t span{color:var(--muted);font-size:12px}
+.g{flex:none;width:20px;height:20px;border-radius:50%;background:var(--cc);color:var(--panel);font:800 11px var(--f-mono);display:inline-flex;align-items:center;justify-content:center}
+.back{font:inherit;font-size:12.5px;background:none;border:0;color:var(--accent);padding:0;cursor:pointer;align-self:flex-start}
+.chip.cat-vote.on{color:var(--c-vote);border-color:var(--c-vote)} .chip.cat-money.on{color:var(--c-money);border-color:var(--c-money)} .chip.cat-culture.on{color:var(--c-culture);border-color:var(--c-culture)}
+.foot{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding:10px 18px}
+.fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;color:#1c2430}
+@media (max-width:860px){
+  .app{grid-template-columns:1fr;grid-template-rows:64vh auto;height:auto}
+  .panel{border-left:0;border-top:1px solid var(--line);overflow:visible}
+  .yearbig{font-size:28px}
+  .brand h1{font-size:16px}
+  .yearcap{display:none}
+}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <section class="stage" aria-label="3D site model">
+    <canvas id="gl" aria-label="Stylized 3D model of Angels Knoll and its surroundings. Drag to orbit, scroll to zoom, click a building to read about it."></canvas>
+    <div class="fallback" id="fallback" hidden>The 3D model could not load in this browser. Every record is still available in the panel.</div>
+    <div class="hud">
+      <div class="brand plate">
+        <h1>Angels Knoll · Parcel Y-1</h1>
+        <p>361 S HILL ST · LOS ANGELES · ILLUSTRATIVE MODEL</p>
+      </div>
+      <div class="yearbox plate">
+        <div class="yearbig" id="yearBig">2026</div>
+        <div class="yearcap" id="yearCap"></div>
+      </div>
+    </div>
+    <div id="tip" hidden></div>
+    <div class="controls plate">
+      <div class="row">
+        <label class="lab" for="year">Year</label>
+        <input type="range" id="year" min="1900" max="2026" step="1" value="2026">
+        <div class="presets" id="presets"></div>
+      </div>
+      <div class="row">
+        <label class="check"><input type="checkbox" id="plan"> Show Angels Landing proposal (approved, never built)</label>
+        <span class="note-sm">Drag to orbit · right-drag or two fingers to pan · scroll to zoom · click a building</span>
+      </div>
+    </div>
+  </section>
+  <aside class="panel" aria-label="Records">
+    <div class="picker">
+      <div class="modesw" id="modeSw" role="group" aria-label="Panel view"><button class="seg" data-mode="records" aria-pressed="true">Site records</button><button class="seg" data-mode="sh" aria-pressed="false">Stakeholders</button></div>
+      <h2 id="pickTitle">Scene objects</h2>
+      <div id="picker"></div>
+    </div>
+    <div class="dossier" id="dossier" aria-live="polite"></div>
+    <div class="foot">Massing, heights, colors and the positions of demolished buildings are approximate (historic buildings are placed by street number). Not survey-accurate. Research compiled September 2026; sources are linked in each record. Light theme shows daytime, dark theme shows dusk. Cars and pedestrians are decorative.</div>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ================= data ================= */
+const L=(t,u)=>`<a href="${u}" target="_blank" rel="noopener">${t}</a>`;
+const U={
+  deir2:"https://planning.lacity.gov/eir/AngelsLanding/deir/files/DEIR%20Sections/D_II.pdf",
+  deir3:"https://planning.lacity.gov/eir/AngelsLanding/deir/files/DEIR%20Sections/D_III.pdf",
+  cult:"https://ceqanet.lci.ca.gov/2019039164/3/Attachment/imfEbg",
+  appE:"https://planning.lacity.gov/eir/AngelsLanding/deir/files/DEIR%20Appendices/App_E.pdf",
+  appC:"https://ceqanet.lci.ca.gov/2019039164/3/Attachment/e19g29",
+  is:"https://planning.lacity.gov/eir/NOPs/AngelsLanding/IS.pdf",
+  nop:"https://planning.lacity.gov/eir/nops/AngelsLanding/nop.pdf",
+  is2:"https://planning.lacity.gov/eir/NOPs/AngelsLanding/Appendix%20IS-2.pdf",
+  is3:"https://planning.lacity.gov/eir/NOPs/AngelsLanding/Appendix%20IS-3.pdf",
+  is4:"https://planning.lacity.gov/eir/NOPs/AngelsLanding/Appendix%20IS-4.pdf",
+  ceqa:"https://ceqanet.lci.ca.gov/2019039164/3",
+  cra25:"https://www.crala.org/internet-site/Meetings/Board_Agenda_2025/Oct_24_2025_Item_5.pdf",
+  cra26:"https://www.crala.org/internet-site/Meetings/Board_Agenda_2026/Aug_26_2026_Item_3.pdf",
+  cf:"https://cityclerk.lacity.org/lacityclerkconnect/index.cfm?fa=ccfi.viewrecord&cfnumber=14-0425-S4",
+  mot16:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-s4_mot_09-21-2016.pdf",
+  cla17:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-S4_rpt_CLA_12-08-2017.pdf",
+  ca17:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-S4_CA_12-16-2017.pdf",
+  cla21:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-S4_rpt_CLA_04-12-2021.pdf",
+  caf21:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-S4_CAF_5-18-21.pdf",
+  mot24:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-s4_misc_9-23-24.pdf",
+  caf24:"https://cityclerk.lacity.org/onlinedocs/2014/14-0425-S4_caf_9-27-24.pdf",
+  opt14:"http://clkrep.lacity.org/onlinedocs/2014/14-0425_MISC_12-08-14.pdf",
+  ruling:"https://rulings.law/rulings/judge-richard-l-fruin/24stcv32173-2025-03-11.html",
+  rd:"https://therealdeal.com/la/2025/01/17/city-of-los-angeles-faces-lawsuit-for-angels-landing-project/",
+  wall:"https://bunkerhilllosangeles.com/2022/05/12/the-great-wall-of-bunker-hill/",
+  thennow:"https://bunkerhilllosangeles.com/2024/09/01/bunker-hill-then-and-now-pt-i/",
+  obhHill:"https://www.onbunkerhill.org/category/hill-st/300-block-hill/",
+  obhClay:"https://www.onbunkerhill.org/category/clay/300-block-clay-street/",
+  obhOlive:"https://www.onbunkerhill.org/category/olive/300-block-olive-street/",
+  eso:"https://esotouric.substack.com/p/angelsknoll",
+  urb26:"https://la.urbanize.city/post/asla-design-contest-reimagines-dtlas-shuttered-angels-knoll",
+  urb22:"https://la.urbanize.city/post/la-city-officials-sign-massive-angels-landing-development",
+  wikiAF:"https://en.wikipedia.org/wiki/Angels_Flight",
+  wikiAL:"https://en.wikipedia.org/wiki/Angels_Landing_(Los_Angeles)",
+  habs:"https://loc.gov/pictures/item/ca0209/",
+  lacAF:"https://www.laconservancy.org/learn/historic-places/angels-flight/",
+  suisman:"https://suisman.com/angel-knoll-featured-in-500-days-of-summer/",
+  nadel:"https://www.getty.edu/research/collections/static/pdf/2002.M.42.pdf",
+  sanborn:"https://hdl.loc.gov/loc.gmd/g4364lm.g4364lm_g00656190603",
+  lapl:"https://www.lapl.org/collections-resources/research-guides/sanborn-atlases",
+  cca:"https://www.cca.qc.ca/en/archives/108951/arthur-erickson-fonds/397577/architectural-projects/413109/california-plaza-competition-and-master-plan",
+  wiki2cal:"https://en.wikipedia.org/wiki/2Cal",
+  case1964:"https://caselaw.findlaw.com/court/ca-supreme-court/1817807.html",
+  brochure:"https://archive.org/details/BunkerHillRedevelopmentProject",
+  surveyla:"https://planning.lacity.gov/odocument/55d383ee-3403-41fb-9b63-5c60afa4a170/SurveyLACentralCity_SurveyReport.pdf",
+  wikiPS:"https://en.wikipedia.org/wiki/Pershing_Square_station",
+  wikiGCM:"https://en.wikipedia.org/wiki/Grand_Central_Market",
+  wikiMDT:"https://en.wikipedia.org/wiki/Million_Dollar_Theater",
+  wikiSTB:"https://en.wikipedia.org/wiki/Subway_Terminal_Building",
+  zimas:"https://zimas.lacity.org/",
+  assessor:"https://portal.assessor.lacounty.gov/"
+};
+
+const SITE_TABS={
+ "Overview":`
+  <dl class="facts">
+   <dt>Addresses</dt><dd>332–358 S Olive St; 351 and 361 S Hill St; 417 and 425 W 4th St (park address: 356 S Olive)</dd>
+   <dt>APN</dt><dd><span class="mono">5149-010-951</span> (2021 Draft EIR). 2016–17 council records use <span class="mono">5149-010-939</span>. <em>Unconfirmed</em></dd>
+   <dt>Lot area</dt><dd><span class="mono">97,631 sf ≈ 2.24 ac</span></dd>
+   <dt>Grade change</dt><dd>About 355 ft at Olive St (NW) down to about 285 ft at Hill and 4th (SE): a <span class="mono">70 ft</span> drop</dd>
+   <dt>Zoning</dt><dd><span class="mono">C2-4D</span>; Regional Center Commercial; Bunker Hill Specific Plan (2013)</dd>
+   <dt>Floor area</dt><dd>BHSP Appendix A allots Parcel Y1 <span class="mono">1,390,900 sf</span>; about <span class="mono">1,269,150 sf</span> stays with this site after the lot line adjustment (≈13:1 FAR)</dd>
+   <dt>Owner</dt><dd>CRA/LA, successor to the Community Redevelopment Agency, in fee simple. CRA/LA Asset ID 168</dd>
+   <dt>Condition</dt><dd>Fenced since July 30, 2013. Metro portal at the SE corner; Angels Flight and a public stair on the north edge. A 2019 tree inventory is in Appendix IS-2</dd>
+  </dl>
+  <p class="src">Sources: ${L("Draft EIR II. Project Description",U.deir2)} · ${L("Initial Study",U.is)} · ${L("CRA/LA, Oct 24, 2025, Item 5",U.cra25)} · ${L("Tree Inventory (IS-2)",U.is2)}</p>`,
+ "Title":`
+  <h4>Legal description (Resolution 25-02, Exhibit A)</h4>
+  <ul class="docs">
+   <li><b>Parcel 1:</b> Lot 5 of Tract No. 30781, except the portions conveyed to Angels Flight Railway Foundation (recorded 12/22/2017, Instr. <span class="mono">2017-1492288</span>) and to 2 CAL Land (LA) Owner, LLC (recorded 11/29/2016, Instr. <span class="mono">2016-1488363</span>)</li>
+   <li><b>Parcel 2:</b> easement rights under the California Plaza Construction, Operation and Reciprocal Easement Agreement of 8/26/1983 (Instr. <span class="mono">83-991992</span>; amended 1993 and 1997)</li>
+   <li><b>Parcel 3:</b> part of Olive Street vacated 8/19/1982 (Instr. <span class="mono">82-837835</span>)</li>
+   <li><b>Mineral rights:</b> reserved, with no surface entry and no drilling within 500 ft of the surface</li>
+  </ul>
+  <h4>Ownership and transactions</h4>
+  <ul class="tl">
+   <li><b>1963–64</b><span>CRA acquires and clears the site under the 1959 redevelopment plan</span></li>
+   <li><b>Feb 2012</b><span>CRA dissolved; CRA/LA takes title as successor</span></li>
+   <li><b>Oct 7, 2014</b><span>State Dept. of Finance approves the LRPMP: "Retained for Future Development"</span></li>
+   <li><b>Jan 8, 2015</b><span>Option Agreement with the City (C-125178)</span></li>
+   <li><b>Dec 13, 2017</b><span>Council selects Angels Landing Partners; fair market value appraised at $45.7M</span></li>
+   <li><b>Mar 28, 2018</b><span>Exclusive Negotiating Agreement (C-131103)</span></li>
+   <li><b>May 18, 2021</b><span>Option amendment fixes the price at $50M</span></li>
+   <li><b>Feb 13, 2024</b><span>City's termination of the ENA takes effect (unauthorized transfer of interest)</span></li>
+   <li><b>Dec 6, 2024</b><span>Developer sues the City, LASC <span class="mono">24STCV32173</span>, about $20M</span></li>
+   <li><b>Sep 30, 2025</b><span>City's option expires unexercised</span></li>
+   <li><b>Oct 24, 2025</b><span>CRA/LA Resolution 25-02 declares the site surplus land</span></li>
+   <li><b>Aug 26, 2026</b><span>Maintenance contract extended to June 30, 2027; disposition in preparation, no public buyer yet</span></li>
+  </ul>
+  <p class="callout">Copies of the recorded deeds and the REA can be ordered from the <b>LA County Registrar-Recorder/County Clerk</b> using the instrument numbers above.</p>`,
+ "History":`
+  <ul class="tl">
+   <li><b>1867</b><span>Prudent Beaudry buys the land between Hill and Olive, 2nd to 4th</span></li>
+   <li><b>Late 1800s</b><span>Mostly single-family houses; Clay Street crosses the site with commercial buildings below the hill</span></li>
+   <li><b>1901</b><span>Angels Flight opens at 3rd and Hill</span></li>
+   <li><b>c.1902</b><span>20 ft stone retaining wall</span></li>
+   <li><b>1959</b><span>Bunker Hill Urban Renewal Project adopted (Ord. 113,231)</span></li>
+   <li><b>1963–64</b><span>Every building on the site demolished</span></li>
+   <li><b>1964–72</b><span>Spoils pile for nearby construction; parking lot added in 1965</span></li>
+   <li><b>1983</b><span>Designated as California Plaza Phase III (never built)</span></li>
+   <li><b>1984</b><span>West part graded into a "temporary park"</span></li>
+   <li><b>1993</b><span>Metro Pershing Square Station opens</span></li>
+   <li><b>1996</b><span>Angels Flight reopens on the site's north edge</span></li>
+   <li><b>2009</b><span>Bench scenes for <i>(500) Days of Summer</i></span></li>
+   <li><b>2013</b><span>Park fenced and closed</span></li>
+   <li><b>Sep 2026</b><span>ASLA emerging professionals competition uses the site</span></li>
+  </ul>
+  <p class="src">Sources: ${L("Draft EIR IV.B Cultural Resources",U.cult)} · ${L("Appendix C",U.appC)} · ${L("Esotouric",U.eso)} · ${L("Urbanize LA",U.urb26)}</p>`,
+ "Documents":`
+  <h4>Environmental review, ENV-2018-3273-EIR</h4>
+  <ul class="docs">
+   <li>${L("Appendix E: Historical Resources Technical Report",U.appE)} (GPA Consulting, Dec 2020, about 43 MB). <b>The most detailed building-by-building history</b></li>
+   <li>${L("Draft EIR IV.B Cultural Resources",U.cult)}</li>
+   <li>${L("II. Project Description",U.deir2)} · ${L("III. Environmental Setting",U.deir3)}</li>
+   <li>${L("Appendix C: Archaeological Resources Report",U.appC)} (Dudek, Nov 2020)</li>
+   <li>${L("IS-4: Phase I Environmental Site Assessment",U.is4)}, usually with Sanborn maps, aerials and a chain of title</li>
+   <li>${L("IS-2: Tree Inventory",U.is2)} · ${L("IS-3: Geotechnical Report",U.is3)} · ${L("Initial Study",U.is)} · ${L("NOP",U.nop)}</li>
+   <li>${L("All 45 attachments on CEQAnet",U.ceqa)}</li>
+  </ul>
+  <h4>Title and government records</h4>
+  <ul class="docs">
+   <li>${L("CRA/LA Resolution 25-02 (Oct 24, 2025)",U.cra25)}</li>
+   <li>${L("CRA/LA Item 3 (Aug 26, 2026)",U.cra26)}</li>
+   <li>${L("Council File 14-0425-S4",U.cf)}: ${L("2016 motion",U.mot16)} · ${L("2017 CLA report",U.cla17)} · ${L("2017 council action",U.ca17)} · ${L("2021 CLA report",U.cla21)} · ${L("2021 action",U.caf21)} · ${L("2024 motion",U.mot24)} · ${L("2024 action",U.caf24)}</li>
+   <li>${L("Option agreements summary (2014)",U.opt14)}</li>
+   <li>${L("LASC 24STCV32173 ruling (Mar 11, 2025)",U.ruling)}</li>
+  </ul>
+  <h4>Archives and lookups</h4>
+  <ul class="docs">
+   <li>${L("Sanborn 1906 (Library of Congress)",U.sanborn)} · ${L("LAPL Sanborn guide",U.lapl)}</li>
+   <li>${L("Getty: Leonard Nadel Bunker Hill photographs, finding aid",U.nadel)}</li>
+   <li>${L("Bunker Hill Redevelopment Project brochure",U.brochure)} · ${L("1964 California Supreme Court decision",U.case1964)}</li>
+   <li>${L("SurveyLA Central City report",U.surveyla)}</li>
+   <li>${L("ZIMAS",U.zimas)} · ${L("LA County Assessor",U.assessor)}</li>
+  </ul>`,
+ "Open questions":`
+  <ul class="docs">
+   <li>APN 5149-010-951 vs. -939: confirm in the Assessor portal or ZIMAS</li>
+   <li>When the park opened: the EIR says a "temporary park" in 1984; other sources say the 1990s or 2000s. Suisman Urban Design says it designed the park with Pat Smith</li>
+   <li>Retaining wall date (c.1902 or c.1903) and whether it lies inside the site</li>
+   <li>The 2024 motion asked for an extension to 2027, but CRA/LA records the option expiring Sep 30, 2025</li>
+   <li>No public record of the lawsuit's 2026 status</li>
+   <li>Names and addresses of the former Olive St and 4th St buildings: check Appendix E and the Sanborn maps</li>
+  </ul>`
+};
+
+const OBJ=[
+ {id:"site",grp:"Site",sw:"#8cc06a",name:"Angels Knoll",en:"Bunker Hill Parcel Y-1",pills:[["p-now","Fenced and vacant · awaiting disposition"]],years:[0,9999],tabs:SITE_TABS},
+ {id:"stair",grp:"Site",sw:"#e2d6bf",name:"Public stair",en:"Stair beside Angels Flight",years:[1995,9999],pills:[["p-now","Standing · c.1995"]],
+  facts:[["Built","c.1995, with the relocated Angels Flight"],["Route","North edge of the site, from Hill St up to Olive St and California Plaza"],["Proposal","Angels Landing would have widened it"]],
+  body:["The only part of the site still open to the public since 2013."],docs:[["Draft EIR IV.B (p. IV.B-26)",U.cult],["Draft EIR II",U.deir2]]},
+ {id:"metro",grp:"Site",sw:"#d9452f",name:"Metro portal",en:"Pershing Square Station, B and D Lines",years:[1993,9999],pills:[["p-now","Standing · 1993"]],
+  facts:[["Lines","Metro B and D, Pershing Square Station"],["Opened","January 30, 1993"],["Location","SE corner of the site; the station box runs under the SE part of the parcel"]],
+  body:["The station structure is a major constraint on any development. No recorded Metro easement was found online."],docs:[["Initial Study",U.is],["Draft EIR III",U.deir3],["Wikipedia",U.wikiPS]]},
+
+ {id:"af1901",grp:"Demolished",sw:"#e07a2e",name:"Angels Flight (original)",en:"Third & Hill, 1901–1969",years:[1901,1969],pills:[["p-gone","Removed 1969"]],
+  facts:[["Years","1901–1969"],["Location","South side of 3rd St, from Hill St to Olive St"],["Setting","Ran on an elevated track through a narrow corridor of commercial buildings, with no stairs alongside (Draft EIR IV.B-24)"]],
+  body:["Move the year before 1969 to see the original line."],docs:[["HABS documentation (LOC)",U.habs],["Wikipedia",U.wikiAF]]},
+ {id:"wall",grp:"Demolished",sw:"#b8aa92",name:"Stone retaining wall",en:"\"Great Wall of Bunker Hill\"",years:[1902,9999],pills:[["p-hist","SurveyLA potential resource"],["p-plan","Location unconfirmed"]],
+  facts:[["Date","c.1902 (EIR) or c.1903"],["Form","About 20 ft tall, stone, with counterfort buttresses"],["Record","1906 Sanborn map marks \"STONE WALL 20′\" running north from 343 S Hill"],["Exposed","1963, when the CRA cleared the Hill St buildings"]],
+  body:["The EIR lists \"Bunker Hill Retaining Wall, S Olive St. (in parking lot)\" as a SurveyLA potential resource. Whether that is the same wall as the Hill St one, and whether it lies on the site, needs Appendix E. Its position in the model is estimated."],docs:[["The Great Wall of Bunker Hill",U.wall],["Draft EIR IV.B, Table IV.B-1",U.cult],["Sanborn 1906",U.sanborn]]},
+ {id:"pembroke",grp:"Demolished",sw:"#a8513d",name:"Pembroke Hotel",en:"Mary Doran Block · 339–343 S Hill",years:[1904,1963],pills:[["p-gone","Demolished 1963"]],
+  facts:[["Address","339–343 S Hill St"],["Architects","Austin & Brown"],["Built","1904"],["Demolished","1963 (CRA)"]],body:["Placed by street number, just north of today's Angels Flight."],docs:[["The Great Wall of Bunker Hill",U.wall],["On Bunker Hill: 300 block of Hill",U.obhHill]]},
+ {id:"steere",grp:"Demolished",sw:"#c9a27a",name:"Steere Block",en:"California Eclectic Medical College · 333–337 S Hill",years:[1904,1963],pills:[["p-gone","Demolished 1963"]],
+  facts:[["Address","333–337 S Hill St"],["Architect","Robert Brown Young"],["Built","1904"],["Demolished","1963 (CRA)"]],body:["Home of the California Eclectic Medical College."],docs:[["The Great Wall of Bunker Hill",U.wall]]},
+ {id:"dunn",grp:"Demolished",sw:"#e6d8bb",name:"Dunn-Albright-Ames Block",en:"329–331 S Hill",years:[1913,1963],pills:[["p-gone","Demolished 1963"]],
+  facts:[["Address","329–331 S Hill St"],["Architect","Albert C. Martin"],["Built","1913"],["Demolished","1963 (CRA)"]],body:["Between 1893 and 1906 Hill Street turned from a residential street into a commercial one, and brick blocks replaced the wood houses."],docs:[["The Great Wall of Bunker Hill",U.wall]]},
+ {id:"hillcom",grp:"Demolished",sw:"#b5684c",name:"Hill St storefront blocks",en:"West side, 351–361 S Hill (names unknown)",years:[1895,1963],pills:[["p-gone","Demolished 1963–64"],["p-plan","Names unknown"]],
+  facts:[["Location","Below the hill on the site's east side, east of Clay St"],["Record","A 1904 police raid on a parlor house at 355 S Hill"],["Demolished","1963–64 (CRA)"]],
+  body:["Draft EIR: \"East of Clay Street, below the hill, were commercial buildings.\" Building names should be in Appendix E or the Sanborn maps."],docs:[["Draft EIR IV.B (p. IV.B-16)",U.cult],["On Bunker Hill: 300 block of Hill",U.obhHill],["Sanborn 1906",U.sanborn]]},
+ {id:"clay",grp:"Demolished",sw:"#9e958a",name:"Clay Street",en:"Vanished street through the site",years:[1875,1963],pills:[["p-gone","Erased"]],
+  facts:[["Route","Parallel to Hill and Olive, through the middle of the site"],["Frontage","310 Clay: Hotel Clayton (formerly Hotel Lorraine); 316 Clay: Patterson Hotel; 350 Clay: next to Angels Flight"],["Erased","Regrading in the 1960s"]],
+  body:["\"Then-and-Now\" notes the old line of Clay St \"has mostly disappeared\" on Angels Knoll. Whether those hotels stood inside today's site is unconfirmed."],docs:[["On Bunker Hill: 300 block of Clay",U.obhClay],["Bunker Hill Then-and-Now",U.thennow],["Draft EIR IV.B",U.cult]]},
+ {id:"olive",grp:"Demolished",sw:"#d9b8a0",name:"Olive St houses and hotels",en:"Victorian houses, apartment hotels, boarding houses",years:[1885,1964],pills:[["p-gone","Demolished 1963–64"]],
+  facts:[["Late 1800s","Mostly single-family Victorian houses"],["Early 1900s","Apartment hotels and boarding houses along Olive St"],["1928","Site and surroundings at peak development (topographic maps)"]],
+  body:["The Getty's Leonard Nadel photographs (1951–56) have folders for Olive St and Clay St, useful for rebuilding the facades. House colors in the model are illustrative."],docs:[["Draft EIR IV.B",U.cult],["Appendix C (p. 20)",U.appC],["Nadel finding aid",U.nadel],["On Bunker Hill: 300 block of Olive",U.obhOlive]]},
+
+ {id:"af",grp:"Historic resources",sw:"#e07a2e",name:"Angels Flight",en:"Funicular, relocated 1996",years:[1996,9999],pills:[["p-hist","LA HCM #4"],["p-hist","National Register 2000"]],
+  facts:[["First opened","December 31, 1901, at 3rd and Hill (Col. J.W. Eddy)"],["Here since","Reopened February 24, 1996, half a block south of the original site, on the site's north edge"],["Cars","Sinai and Olivet"],["Designations","HCM #4 (1962); National Register, Oct 13, 2000, ref. 00001168"],["Title link","Part of the site was deeded to Angels Flight Railway Foundation on 12/22/2017 (Instr. 2017-1492288)"]],
+  body:["Closed and dismantled in May 1969 for redevelopment, then stored for 27 years. Shut again after a 2001 accident and a 2013 derailment; reopened August 31, 2017. The EIR dates the relocation to 1995 and the reopening to 1996."],
+  docs:[["Wikipedia: Angels Flight",U.wikiAF],["LA Conservancy",U.lacAF],["HABS CA-0209 (LOC)",U.habs],["Draft EIR IV.B",U.cult]]},
+ {id:"gcm",grp:"Historic resources",sw:"#eadfc8",name:"Grand Central Market",en:"Homer Laughlin Building · 315 S Broadway",years:[1898,9999],pills:[["p-hist","Broadway Historic District contributor"]],
+  facts:[["Building","Homer Laughlin Building, 1898 (EIR)"],["Market","Opened 1917"],["Relation","Faces the Angels Flight lower station across Hill St"]],
+  body:["With Angels Flight and the site, it forms the main pedestrian link between Bunker Hill and Broadway."],docs:[["Draft EIR IV.B, Table IV.B-1",U.cult],["Wikipedia",U.wikiGCM]]},
+ {id:"mdt",grp:"Historic resources",sw:"#e3cfa6",name:"Million Dollar Theater",en:"306 W 3rd St",years:[1918,9999],pills:[["p-hist","National Register 1978"]],
+  facts:[["Built","1918"],["Designation","National Register 1978; Broadway Historic District contributor"]],body:["An early movie palace opened by Sid Grauman, with a richly ornamented terra cotta front."],docs:[["Draft EIR IV.B",U.cult],["Wikipedia",U.wikiMDT]]},
+ {id:"clark",grp:"Historic resources",sw:"#c58f6a",name:"Hotel Clark",en:"426 S Hill St",years:[1913,9999],pills:[["p-hist","NR-eligible · CRHR listed"]],
+  facts:[["Built","1913 (EIR)"],["Designation","Eligible for the National Register; listed in the California Register"]],body:["South of 4th St on the east side of Hill."],docs:[["Draft EIR IV.B",U.cult]]},
+ {id:"stb",grp:"Historic resources",sw:"#9b5d45",name:"Subway Terminal Building",en:"417 S Hill St · now Metro 417",years:[1926,9999],pills:[["p-hist","LA HCM #177"],["p-hist","National Register 2006"]],
+  facts:[["Built","1926"],["Original use","Terminal and offices for the Pacific Electric Hollywood subway"],["Today","Metro 417 apartments"]],body:["Directly south of the site across 4th St."],docs:[["Draft EIR IV.B",U.cult],["Wikipedia",U.wikiSTB]]},
+ {id:"psb",grp:"Historic resources",sw:"#d1b089",name:"Pershing Square Building",en:"448 S Hill St",years:[1924,9999],pills:[["p-hist","NR-eligible · CRHR listed"]],
+  facts:[["Built","1924"],["Designation","Eligible for the National Register; listed in the California Register"]],body:["At Hill and 5th, facing Pershing Square."],docs:[["Draft EIR IV.B",U.cult]]},
+ {id:"tgt",grp:"Historic resources",sw:"#ebe6da",name:"Title Guarantee & Trust",en:"411 W 5th St",years:[1930,9999],pills:[["p-hist","LA HCM #278"],["p-hist","National Register 1984"]],
+  facts:[["Built","1930"],["Designation","HCM #278; National Register 1984"]],body:["Art Deco office tower with a set-back crown, facing Pershing Square."],docs:[["Draft EIR IV.B",U.cult]]},
+
+ {id:"angelus",grp:"Modern buildings",sw:"#d9d4cc",name:"Angelus Plaza",en:"255 S Hill St · senior housing",years:[1982,9999],pills:[["p-now","Standing · 1982"]],
+  facts:[["Units","1,093 affordable apartments for people 62 and older"],["Opened","1982; 17 stories"],["Operator","Retirement Housing Foundation (nonprofit)"],["Rent","Capped at 30% of income (HUD 202 / tax credit)"]],
+  body:["The largest residential population near the site, about a block north. Placed approximately in the model."],docs:[["DTLA Alliance building profile","https://downtownla.com/building/angelus-plaza"],["Angelus Plaza FAQ","https://angelusplaza.org/frequently-asked-questions/"]]},
+ {id:"cp1",grp:"Modern buildings",sw:"#5aa3ae",name:"One California Plaza",en:"300 S Grand Ave",years:[1985,9999],pills:[["p-now","Standing · 1985"]],
+  facts:[["Height","42 floors, about 578 ft"],["Master plan","Arthur Erickson (competition 1979–80)"],["Title link","The 8/26/1983 Reciprocal Easement Agreement (Instr. 83-991992) is the source of the site's Parcel 2 rights"]],
+  body:["California Plaza was planned in three phases. Phase III, Three California Plaza, was to stand on Angels Knoll and was dropped in the early-1990s recession."],docs:[["CCA: Arthur Erickson fonds",U.cca],["Draft EIR II (pp. II-34–35)",U.deir2]]},
+ {id:"cp2",grp:"Modern buildings",sw:"#5aa3ae",name:"Two California Plaza",en:"350 S Grand Ave",years:[1992,9999],pills:[["p-now","Standing · 1992"]],
+  facts:[["Height","52 floors, about 750 ft"],["Title link","Part of the original parcel was deeded to 2 CAL Land (LA) Owner, LLC on 11/29/2016 (Instr. 2016-1488363)"]],
+  body:["The grantee's name points to Two California Plaza's owner; the exact relationship is unconfirmed. The California Plaza Watercourt sits on the podium between the towers."],docs:[["Wikipedia: 2Cal",U.wiki2cal],["CRA/LA Resolution 25-02",U.cra25]]},
+
+ {id:"twA",grp:"Proposal",sw:"#9fd8ff",name:"Angels Landing Tower A",en:"Proposed, 64 floors (never built)",years:[0,9999],plan:true,pills:[["p-plan","Approved · never built"]],
+  facts:[["Height","64 floors, about 854 ft"],["Developer","Angels Landing Partners (Peebles / MacFarlane / Claridge)"],["Architect","Handel Architects"],["Approved","March 2022"]],
+  body:["The full program was 1,269,150 sf: 180 condominiums, 261 apartments, 509 hotel rooms, plus retail, school and open space. Tower positions in the model are approximate."],docs:[["CEQAnet project page",U.ceqa],["Urbanize LA, 2022",U.urb22],["Wikipedia",U.wikiAL]]},
+ {id:"twB",grp:"Proposal",sw:"#9fd8ff",name:"Angels Landing Tower B",en:"Proposed, 42 floors (never built)",years:[0,9999],plan:true,pills:[["p-plan","Agreement terminated"]],
+  facts:[["Height","42 floors (height approximate)"],["Terminated","ENA termination effective Feb 13, 2024"],["Lawsuit","LASC 24STCV32173; developer seeks about $20M"]],
+  body:["On March 11, 2025 the court overruled the City's demurrer to the breach-of-contract claim. No 2026 ruling or settlement is on public record."],docs:[["LASC ruling",U.ruling],["The Real Deal",U.rd]]}
+];
+const BYID=Object.fromEntries(OBJ.map(o=>[o.id,o]));
+const MILESTONES=[[1900,"Bunker Hill is a mature residential district"],[1901,"Angels Flight opens at 3rd and Hill"],[1904,"Brick commercial blocks rise on Hill St"],[1928,"Peak development around the site"],[1959,"Bunker Hill redevelopment plan adopted"],[1963,"CRA demolishes every building on the site"],[1965,"Spoils pile and parking lot"],[1969,"Angels Flight dismantled"],[1984,"West part graded into a temporary park"],[1985,"One California Plaza completed"],[1992,"Two California Plaza completed"],[1993,"Metro Pershing Square Station opens"],[1996,"Angels Flight reopens on the north edge"],[2009,"(500) Days of Summer filmed here"],[2013,"Park fenced and closed"],[2017,"City selects the Angels Landing developer"],[2022,"Angels Landing approved"],[2024,"Deal terminated; developer sues"],[2025,"CRA/LA declares the site surplus"],[2026,"Still fenced, awaiting disposition"]];
+
+/* ================= stakeholders ================= */
+const CAT={
+  vote:{label:"People who vote",short:"Vote",glyph:"V",tok:"--c-vote",hex:["#2f6fe0","#7fa8ff"],blurb:"Residents and the elected officials who answer to them. Their power is political: council deference, motions, mayoral decisions, neighborhood council votes, petitions."},
+  money:{label:"People who make money",short:"Money",glyph:"$",tok:"--c-money",hex:["#178a5b","#4fd39a"],blurb:"The seller, would-be buyers, neighboring owners and operators. Their power is financial: who can buy, finance, sue, or profit from what gets built."},
+  culture:{label:"People who have cultural power",short:"Culture",glyph:"C",tok:"--c-culture",hex:["#8a4fd0","#c39bff"],blurb:"Advocates, historians, designers, artists and media who shape what the site means. Their power is narrative: memory, naming, publicity and professional legitimacy."}
+};
+const S={
+  cf:"https://cityclerk.lacity.org/lacityclerkconnect/index.cfm?fa=ccfi.viewrecord&cfnumber=14-0425-S4",
+  jur:"https://en.wikipedia.org/wiki/Ysabel_Jurado", urbSur:"https://la.urbanize.city/post/crala-putting-angels-landing-and-bethune-library-sites-grabs",
+  el26:"https://en.wikipedia.org/wiki/2026_Los_Angeles_elections", mayor26:"https://en.wikipedia.org/wiki/2026_Los_Angeles_mayoral_election",
+  ed1:"https://mayor.lacity.gov/news/mayor-bass-signs-executive-directive-dramatically-accelerate-and-lower-cost-affordable-housing",
+  huiz:"https://laist.com/brief/news/politics/former-la-councilmember-jose-huizar-sentenced-to-13-years-in-prison", laist16:"https://laist.com/news/angels-knoll-sale",
+  kdl:"https://www.bisnow.com/los-angeles/news/construction-development/angels-landing-kevin-de-leon-115931",
+  dlanc:"https://www.prnewswire.com/news-releases/downtown-la-neighborhood-council-board-of-directors-votes-official-approval-of-angels-landing-hotel-development-301369384.html",
+  angelus:"https://downtownla.com/building/angelus-plaza", angelusFaq:"https://angelusplaza.org/frequently-asked-questions/",
+  m417:"https://downtownla.com/building/metro-417-subway-terminal-building",
+  westend:"https://thewestendmuseum.org/history/topic/urban-renewal/the-angels-flight-from-the-hill-urban-renewal-in-l-a-s-bunker-hill-neighborhood/",
+  pet13:"https://www.change.org/p/city-of-los-angeles-department-of-parks-and-recreation-re-open-angels-knoll",
+  pet24:"https://www.change.org/p/restore-and-reopen-angels-knoll-the-heart-of-los-angeles",
+  sup:"https://en.wikipedia.org/wiki/2026_Los_Angeles_County_Board_of_Supervisors_election",
+  crafaq:"https://planning.lacity.gov/ordinances/docs/CRA_CleanUp/faq.pdf",
+  cra25:"https://www.crala.org/internet-site/Meetings/Board_Agenda_2025/Oct_24_2025_Item_5.pdf",
+  cra26:"https://www.crala.org/internet-site/Meetings/Board_Agenda_2026/Aug_26_2026_Item_3.pdf",
+  dtn13:"https://www.ladowntownnews.com/news/cra-land-sales-coming-including-one-high-profile-bunker-hill/article_87328bac-48d1-11e3-8dd2-001a4bcf887a.html",
+  co25:"https://commercialobserver.com/2025/10/la-angels-landing-surplus-land-development/",
+  bis25:"https://www.bisnow.com/los-angeles/news/construction-development/downtowns-former-angels-landing-site-could-be-on-the-auction-block-soon-132018",
+  trd25:"https://therealdeal.com/la/2025/01/17/city-of-los-angeles-faces-lawsuit-for-angels-landing-project/",
+  ruling:"https://rulings.law/rulings/judge-richard-l-fruin/24stcv32173-2025-03-11.html",
+  finalists:"https://la.urbanize.city/post/four-finalists-emerge-angels-landing-site",
+  calland:"https://labusinessjournal.com/real-estate/downtown-california-plaza-land-sells-103-million/",
+  onecal:"https://therealdeal.com/la/2025/07/11/one-california-plaza-in-foreclosure/", onecal26:"https://therealdeal.com/la/2026/02/27/downtown-las-one-california-plaza-lands-big-office-lease/",
+  gcmsale:"https://www.timeout.com/los-angeles/blog/freshly-100-grand-central-market-just-sold-to-a-new-owner-110117",
+  p3:"https://www.infrainsightblog.com/angels-flight-to-re-open-through-los-angeles-p3", afops:"https://www.angelsflight.org/operations/",
+  clark:"https://en.wikipedia.org/wiki/Hotel_Clark", stbw:"https://en.wikipedia.org/wiki/Subway_Terminal_Building",
+  vac:"https://www.bisnow.com/los-angeles/news/office/los-angeles-office-q2-2026-westside-century-city-135496",
+  spiral:"https://therealdeal.com/la/2026/06/24/downtown-las-downward-spiral/",
+  jobs:"https://dtlaweekly.com/african-american-developers-victor-macfarlane-don-peebles-expand-minority-job-opportunities-with-greenlight-for-angels-landing-project/",
+  eso1:"https://esotouric.substack.com/p/angelsknoll", eso2:"https://esotouric.substack.com/p/angelsknoll2", esoTour:"https://esotouric.com/event/sterling-politi-angels-2026/",
+  politi:"https://en.wikipedia.org/wiki/Leo_Politi", politiYT:"https://www.youtube.com/watch?v=rU9ukFjFXBQ", politiLAPL:"https://bunkerhilllosangeles.com/2023/12/17/leo-politi-bunker-hill/",
+  marsak:"https://acp.lapl.org/book/bunker-hill-los-angeles/", refrain:"https://bunkerhillrefrain.org/", lostla:"https://www.pbssocal.org/shows/lost-la/unlocking-the-hidden-human-history-of-bunker-hill",
+  asla:"https://www.asla.org/news-insights/land/(clone)-reimagining-angel-s-knoll-celebrating-the-2026-emerging-professionals-design-competition",
+  aslaBrief:"https://www.asla.org/news-insights/land/2026-asla-emerging-professionals-design-competition", urb26:"https://la.urbanize.city/post/asla-design-contest-reimagines-dtlas-shuttered-angels-knoll",
+  afrf:"https://www.angelslandingdtla.com/2021/03/angels-flight-railway-foundation-supports-angels-landing/", lac:"https://www.laconservancy.org/learn/historic-places/angels-flight/",
+  laist13:"https://laist.com/news/why-you-cant-sit-on-the-500-days-of", gg:"https://goldenglobes.com/articles/500-days-summer-used-many-beloved-downtown-la-locations/", yelp:"https://www.yelp.com/biz/angels-knoll-los-angeles",
+  gp:"https://en.wikipedia.org/wiki/Grand_Performances",
+  tcr:"https://files.ceqanet.lci.ca.gov/250151-3/attachment/RXmSr7p4aFe5GbLmip-QrBvB1R2Nb9McnBaOd2JHoaPkSCJrTKLND0QpM0gNqUABT7-_QFaR5NWldhOj0",
+  lamag:"https://lamag.com/urbandevelopment/angels-flight-area/", psrs:"http://restorepershingsquare.blogspot.com/2018/12/after-fbi-raids-big-questions-for-jose.html"
+};
+/* pos: [stance, leverage]; stance -1 = keep it public / park, +1 = sell and build; leverage 0..1. Our qualitative reading of the public record. */
+const SH=[
+ // ---- VOTE ----
+ {id:"jurado",cat:"vote",name:"CM Ysabel Jurado",role:"LA City Council, District 14 (since Dec 9, 2024)",pos:[0,.86],unknown:true,objs:["site"],
+  interest:"Any city purchase, park funding or rezoning would start as a CD14 motion. Under council deference she is the gatekeeper.",
+  stance:"No public statement or motion on the site found. Esotouric's park campaign now targets her office.",
+  lev:"High. Her seat is not on the 2026 ballot. Her office faced 2026 criticism over budget management.",src:[["Ysabel Jurado (Wikipedia)",S.jur],["Urbanize LA, Oct 2025",S.urbSur],["2026 LA elections",S.el26]]},
+ {id:"mayor",cat:"vote",name:"Mayor of Los Angeles",role:"Karen Bass (incumbent); Nov 3, 2026 runoff vs. Nithya Raman",pos:[.1,.78],objs:["site"],
+  interest:"The City held the purchase option. The 2024 council motion asked the Mayor for a 36-month extension, but the option lapsed Sep 30, 2025.",
+  stance:"The City terminated the Angels Landing agreement in Feb 2024 and let the option expire. Executive Directive 1 could fast-track a 100% affordable project, though nothing ties it to this site yet.",
+  lev:"High but changing: primary results were Bass 34.3%, Raman 29.0%. The winner takes office Dec 2026.",src:[["2026 mayoral election",S.mayor26],["Executive Directive 1",S.ed1],["Council File 14-0425-S4",S.cf]]},
+ {id:"formercms",cat:"vote",name:"Former CMs Huizar and de León",role:"CD14, 2016 and 2024 motions",pos:[.45,.18],objs:["site","twA"],
+  interest:"José Huizar's Sept 2016 motion began the sale to a private developer. Kevin de León's Sept 2024 motion (adopted 11–0) sought more time for the City to buy.",
+  stance:"Huizar was sentenced in Jan 2024 to 13 years for corruption, a shadow over the 2016–17 selection. In 2022 the developers refused to work with de León after the City Hall audio leak.",
+  lev:"Historical. Both left office, but their records shape how the public reads any new deal.",src:[["LAist 2016",S.laist16],["Huizar sentencing (LAist)",S.huiz],["Bisnow on de León, 2022",S.kdl],["Council File 14-0425-S4",S.cf]]},
+ {id:"dlanc",cat:"vote",name:"Downtown LA Neighborhood Council",role:"Elected advisory body (DLANC)",pos:[.6,.32],objs:["site"],
+  interest:"The formal voice of downtown residents and workers on land-use cases.",
+  stance:"Voted unanimously in committee (May 2021) and at the board (July 31, 2021) to support Angels Landing. No position found on the 2025 surplus declaration.",
+  lev:"Advisory only, but council members cite its votes.",src:[["DLANC support for Angels Landing, 2021",S.dlanc]]},
+ {id:"angelus",cat:"vote",name:"Angelus Plaza residents",role:"1,093 affordable senior apartments, 255 S Hill St",pos:[-.45,.16],objs:["angelus","af","stair"],
+  interest:"The largest residential population near the site, aged 62+. Most likely to care about accessible open space, the Angels Flight and stair link, and construction impacts.",
+  stance:"No documented position found.",
+  lev:"Low individually, large as a voting bloc. Operated by the nonprofit Retirement Housing Foundation.",src:[["DTLA Alliance building profile",S.angelus],["Angelus Plaza FAQ",S.angelusFaq]]},
+ {id:"m417res",cat:"vote",name:"Metro 417 residents",role:"277 rentals in the Subway Terminal Building, across 4th St",pos:[-.1,.1],objs:["stb"],
+  interest:"Directly face the fenced site. Views, street life and construction would affect them first.",stance:"No documented position found.",lev:"Low.",src:[["DTLA Alliance building profile",S.m417]]},
+ {id:"displaced",cat:"vote",name:"Displaced Bunker Hill residents",role:"At least 8,000 people and 7,310 housing units removed after 1959",pos:[-.8,.12],objs:["olive","clay","hillcom"],
+  interest:"Angels Knoll is the last undeveloped parcel of the urban renewal that cleared their neighborhood.",
+  stance:"Their descendants and advocates frame the site as owed back to the public.",lev:"Moral rather than electoral; carried today by cultural groups.",src:[["The West End Museum",S.westend],["Esotouric",S.eso2]]},
+ {id:"petitions",cat:"vote",name:"Petition signers",role:"Change.org, 2013 and 2024",pos:[-.9,.1],objs:["site"],
+  interest:"Reopen the park. The 2013 petition (713 supporters) asked the City to buy it as a park; the 2024 one (68 signatures) targets Mayor Bass.",stance:"Pro-park.",lev:"Low on its own.",src:[["Re-Open Angels Knoll (2013)",S.pet13],["Restore and Reopen Angels Knoll (2024)",S.pet24]]},
+ {id:"county",cat:"vote",name:"LA County Supervisor, District 1",role:"Hilda Solis until Dec 2026; María Elena Durazo elected June 2026",pos:[.4,.38],objs:["site"],
+  interest:"The County is a taxing entity that shares in sale proceeds and sits on the oversight board for CRA/LA actions.",stance:"No stated position found; the County gains from a higher price.",lev:"Medium, through the oversight board.",src:[["2026 Supervisors election",S.sup]]},
+
+ // ---- MONEY ----
+ {id:"crala",cat:"money",name:"CRA/LA and the taxing entities",role:"Owner and seller; proceeds go to the County, City, LAUSD and others",pos:[.92,.95],objs:["site"],
+  interest:"Dissolution law requires the former agency's land to be sold, with net proceeds going to the taxing entities. Bought in 1961 for $2.7M, appraised at $45.7M in 2017, priced at $50M in 2021.",
+  stance:"Declared the site surplus land on Oct 24, 2025 (Resolution 25-02): a 60-day first offer to affordable-housing developers, then open sale or auction. Pays DTLA Alliance to maintain it through June 2027.",
+  lev:"Highest. It holds title. Its three-member board is appointed by the Governor, not elected locally.",src:[["CRA/LA Resolution 25-02",S.cra25],["CRA/LA Aug 2026 item",S.cra26],["LA Downtown News, 2013",S.dtn13],["CRA FAQ",S.crafaq],["Bisnow, Nov 2025",S.bis25]]},
+ {id:"alp",cat:"money",name:"Angels Landing Partners",role:"Peebles Corp. (Don Peebles) and MacFarlane Partners (Victor MacFarlane)",pos:[.7,.48],objs:["twA","twB","stb"],
+  interest:"Says it spent about $20M on the $1.6B two-tower project and is suing the City for about $20M (LASC 24STCV32173). In March 2025 the breach-of-contract claim survived the City's demurrer.",
+  stance:"Peebles, Nov 2025: \"There's no project there on Angels Landing that is economically feasible now.\" They appear to want damages, not the site. MacFarlane Partners has owned Metro 417 across 4th St since 2014 (current ownership unconfirmed).",
+  lev:"Medium. Pending litigation could cloud a sale's timing.",src:[["The Real Deal, Jan 2025",S.trd25],["Court ruling, Mar 2025",S.ruling],["Bisnow, Nov 2025",S.bis25],["Subway Terminal Building",S.stbw]]},
+ {id:"affdev",cat:"money",name:"Affordable-housing developers",role:"First in line under the Surplus Land Act",pos:[.55,.4],objs:["site"],
+  interest:"State law gives them a 60-day first look. Better Angels (André Bueno) told Bisnow it was weighing the site.",stance:"Build housing; would need public subsidy on a sloped site over a Metro station.",lev:"Medium. Legal priority, limited capital.",src:[["Bisnow, Nov 2025",S.bis25],["Commercial Observer, Oct 2025",S.co25]]},
+ {id:"otherdev",cat:"money",name:"Other developers and bidders",role:"2017 finalists included Lowe/Gensler, Onni/Natoma, Trammell Crow/MAD",pos:[.85,.3],objs:["site"],
+  interest:"Would buy at auction if the affordable window passes. Downtown office vacancy was 35.3% in Q2 2026 and Measure ULA adds a transfer tax, so bids would likely come in well below $50M.",stance:"Pro-sale at the right price.",lev:"Medium; depends on the market.",src:[["Four finalists, 2017",S.finalists],["DTLA office vacancy Q2 2026",S.vac],["The Real Deal, June 2026",S.spiral]]},
+ {id:"cim",cat:"money",name:"CIM Group (Two California Plaza)",role:"Owns the 2Cal tower (2014) and its land (bought from CRA/LA for $70M in 2022)",pos:[.15,.3],objs:["cp2"],
+  interest:"The site is its front yard and view corridor. Part of the original parcel went to \"2 CAL Land (LA) Owner, LLC\" in 2016, likely CIM's land entity (unconfirmed).",stance:"No public position found.",lev:"Medium; shares the 1983 easement agreement that binds the site.",src:[["LA Business Journal, 2022",S.calland]]},
+ {id:"onecal",cat:"money",name:"One California Plaza owner and lender",role:"In receivership since Aug 2025",pos:[.1,.12],objs:["cp1"],
+  interest:"Value down about 74% to roughly $120M; 55% occupied in early 2026. A better 4th and Hill corner would help leasing.",stance:"No position found.",lev:"Low while distressed.",src:[["The Real Deal, July 2025",S.onecal],["The Real Deal, Feb 2026",S.onecal26]]},
+ {id:"gcmown",cat:"money",name:"Grand Central Market owner",role:"Langdon Street Capital (Adam Daneshgar), since 2017",pos:[-.15,.16],objs:["gcm"],
+  interest:"Foot traffic between Bunker Hill and Broadway runs past the site and down Angels Flight.",stance:"No position found.",lev:"Low to medium.",src:[["Time Out, 2017",S.gcmsale]]},
+ {id:"afops",cat:"money",name:"Angels Flight operators",role:"Angels Flight Railway Foundation with ACS Infrastructure and SENER (30-year concession, 2017)",pos:[.5,.24],objs:["af","stair"],
+  interest:"Revenue share from fares ($1.50; $0.75 with TAP). More people on the site means more riders.",stance:"The Foundation publicly backed Angels Landing in 2021.",lev:"Low to medium; owns a strip of the original parcel (deeded 2017).",src:[["P3 overview",S.p3],["Angels Flight operations",S.afops],["Foundation statement, 2021",S.afrf]]},
+ {id:"metroA",cat:"money",name:"LA Metro",role:"Pershing Square Station under the site",pos:[.2,.5],objs:["metro"],
+  interest:"Protect the station box and portal; gain riders from whatever is built.",stance:"Technical constraint more than advocate.",lev:"Medium: any foundation design must clear Metro.",src:[["Draft EIR III",U.deir3]]},
+ {id:"labor",cat:"money",name:"Building trades and hotel labor",role:"Construction and hospitality unions",pos:[.8,.34],objs:["twA","twB"],
+  interest:"Angels Landing was promoted with about 8,300 construction jobs and 800 permanent jobs.",stance:"Historically pro-development; no 2025–26 statement found.",lev:"Medium in council politics.",src:[["DTLA Weekly",S.jobs]]},
+ {id:"neighbors",cat:"money",name:"Other neighboring owners",role:"Hotel Clark (Chetrit Group) and Historic Core businesses",pos:[.25,.12],objs:["clark","mdt","psb"],
+  interest:"An activated corner raises values; a long construction period disrupts.",stance:"No positions found.",lev:"Low.",src:[["Hotel Clark",S.clark]]},
+
+ // ---- CULTURE ----
+ {id:"eso",cat:"culture",name:"Esotouric",role:"Kim Cooper and Richard Schave, historians and tour operators",pos:[-.95,.45],objs:["site"],
+  interest:"Reopen the 2.26-acre knoll as a funded public park named \"Leo & Helen Politi Bunker Hill Park,\" honoring the roughly 9,000 people displaced.",
+  stance:"\"The best use of 'Parcel Y-1' is what everyone already thinks it is: as a park!\" Email and phone campaigns to CD14 since Sept 2024; videos, tours; by May 2026 the site appears on Google Maps under the Politi name.",
+  lev:"The most organized voice. A Substack with more than 9,000 subscribers; also runs the Pershing Square Restoration Society blog.",src:[["Esotouric, part 1",S.eso1],["Esotouric, part 2",S.eso2],["2026 tour",S.esoTour],["Pershing Square Restoration Society",S.psrs]]},
+ {id:"politi",cat:"culture",name:"The Politi family",role:"Heirs of Leo Politi (1908–1996), Caldecott-winning artist of Bunker Hill",pos:[-.88,.22],objs:["site","olive"],
+  interest:"Leo Politi painted and wrote about old Bunker Hill (1964). LAPL holds his paintings. Daughter Suzanne Politi Bischof calls the proposed name \"a blessing.\"",stance:"Pro-park and naming.",lev:"Symbolic; gives the campaign a face.",src:[["Leo Politi",S.politi],["Video with Suzanne Politi Bischof",S.politiYT],["Politi at LAPL",S.politiLAPL]]},
+ {id:"hist",cat:"culture",name:"Historians and memory projects",role:"Nathan Marsak; USC Bunker Hill Refrain; PBS SoCal Lost LA",pos:[-.6,.22],objs:["olive","clay","wall","hillcom"],
+  interest:"Recover the lost neighborhood: oral histories, 5,000+ transcribed records, a digital 3D model, and the \"sunshine and noir\" story.",stance:"Challenge the \"slum clearance\" narrative; supply the displacement argument. No direct site position found from Marsak.",lev:"Shapes how journalists and designers talk about the site.",src:[["Bunker Hill Refrain (USC)",S.refrain],["Marsak's book",S.marsak],["Lost LA",S.lostla]]},
+ {id:"asla",cat:"culture",name:"ASLA and young designers",role:"2026 Emerging Professionals Design Competition (national ASLA)",pos:[-.72,.26],objs:["site"],
+  interest:"Brief framed the knoll as \"a landscape in transition\": accessibility, climate, equity. Winner: \"Folding Angel's Knoll\" by Yuehui Gong. Held for the Sept 2026 national conference in LA.",stance:"Implicitly pro-public open space.",lev:"Professional legitimacy and fresh images of what the site could be.",src:[["ASLA winners",S.asla],["Competition brief",S.aslaBrief],["Urbanize LA",S.urb26]]},
+ {id:"afrf",cat:"culture",name:"Angels Flight Railway Foundation",role:"Steward of a city landmark (HCM #4)",pos:[.45,.3],objs:["af"],
+  interest:"Protect views of and access to the railway.",stance:"President Hal Bastian, 2021: \"We support the Angels Landing project and urge the city to approve it.\" A cultural voice that sided with development.",lev:"Medium; landmark status gives it standing.",src:[["Foundation statement",S.afrf]]},
+ {id:"lacons",cat:"culture",name:"LA Conservancy",role:"Preservation nonprofit",pos:[0,.32],unknown:true,objs:["af","wall"],
+  interest:"Championed Angels Flight's restoration. The retaining wall is a SurveyLA potential resource it could take up.",stance:"No position found on the knoll or the sale.",lev:"Medium if it engages.",src:[["Angels Flight (LA Conservancy)",S.lac]]},
+ {id:"film",cat:"culture",name:"Film fans and visitors",role:"(500) Days of Summer pilgrims",pos:[-.6,.1],objs:["site"],
+  interest:"The bench from the 2009 film was the park's best-known spot. Gated in 2013; benches removed Jan 30, 2025.",stance:"Want access back. The \"CLOSED\" Yelp listing still draws reviews.",lev:"Low but visible.",src:[["LAist, 2013",S.laist13],["Golden Globes, 2022",S.gg],["Yelp",S.yelp]]},
+ {id:"gp",cat:"culture",name:"Grand Performances",role:"Free concerts at the California Plaza Watercourt since 1986",pos:[-.2,.16],objs:["cp2"],
+  interest:"Its home was meant to be completed by a third California Plaza tower on this site.",stance:"No position found.",lev:"Low to medium; draws large public audiences next door.",src:[["Grand Performances",S.gp]]},
+ {id:"tongva",cat:"culture",name:"Tongva / Gabrieleño tribes",role:"Nine tribes notified under AB 52 in 2018",pos:[0,.18],unknown:true,objs:["site"],
+  interest:"Traditional territory; the village of Yanga lay about a mile east.",stance:"No tribe requested consultation in 2018. Any new project would trigger fresh AB 52 notices.",lev:"Legal standing in future review.",src:[["Draft EIR IV.K",S.tcr]]},
+ {id:"media",cat:"culture",name:"Local media",role:"Urbanize LA, LAist, LA Magazine, trade press",pos:[-.3,.3],objs:["site"],
+  interest:"Keep the site in public view. LA Magazine called the fenced corner \"one of the most depressing corners in all of DTLA.\"",stance:"Mostly sympathetic to reopening.",lev:"Agenda-setting.",src:[["LA Magazine, 2017",S.lamag],["Urbanize LA",S.urbSur]]}
+];
+const SHBYID=Object.fromEntries(SH.map(s=>[s.id,s]));
+const catColor=c=>getComputedStyle(document.documentElement).getPropertyValue(CAT[c].tok).trim()||CAT[c].hex[0];
+
+/* ================= panel ================= */
+const $=s=>document.querySelector(s);
+let selected="site", siteTab="Overview", year=2026, showPlan=false;
+let mode="records", shSel=null, shFocus=null, shFilter="all";
+const visibleNow=o=>o.plan?showPlan:(year>=o.years[0]&&year<o.years[1]);
+const TABNAMES={"Overview":"Overview","Title":"Title & ownership","History":"History","Documents":"Documents","Open questions":"Open questions"};
+function renderPicker(){
+  document.querySelectorAll("#modeSw .seg").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===mode)));
+  if(mode==="sh"){
+    $("#pickTitle").textContent="Stakeholder groups";
+    $("#picker").innerHTML=`<div class="grp">${["all","vote","money","culture"].map(c=>`<button class="chip cat-${c}${shFilter===c?" on":""}" data-filter="${c}">${c==="all"?"All three":CAT[c].label}</button>`).join("")}</div>`;
+    return;
+  }
+  $("#pickTitle").textContent="Scene objects";
+  const groups=["Site","Demolished","Historic resources","Modern buildings","Proposal"];
+  $("#picker").innerHTML=groups.map(g=>`<div class="grp"><span class="gl">${g}</span>${OBJ.filter(o=>o.grp===g).map(o=>`<button class="chip${o.id===selected?" on":""}${visibleNow(o)?"":" dim"}" data-id="${o.id}">${o.name}</button>`).join("")}</div>`).join("");
+}
+function powerMap(){
+  const W=380,H=300,pl=34,pr=12,pt=18,pb=40,iw=W-pl-pr,ih=H-pt-pb;
+  const X=v=>pl+(v+1)/2*iw, Y=v=>pt+(1-v)*ih;
+  const list=SH.filter(s=>shFilter==="all"||s.cat===shFilter);
+  const SHORT={jurado:"CM Jurado",mayor:"Mayor",crala:"CRA/LA",alp:"Angels Landing Ptnrs",eso:"Esotouric",dlanc:"DLANC",affdev:"Affordable devs",asla:"ASLA",politi:"Politi family",angelus:"Angelus Plaza"};const labelled=new Set(Object.keys(SHORT));
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Power map: stance toward keeping the site public versus selling and building, against leverage">`;
+  g+=`<rect x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="var(--bg)" stroke="var(--line)"/>`;
+  g+=`<line x1="${X(0)}" y1="${pt}" x2="${X(0)}" y2="${pt+ih}" stroke="var(--line)" stroke-dasharray="3 3"/><line x1="${pl}" y1="${Y(.5)}" x2="${pl+iw}" y2="${Y(.5)}" stroke="var(--line)" stroke-dasharray="3 3"/>`;
+  g+=`<text x="${pl+4}" y="${pt+ih+16}" class="ax">← Keep it public / park</text><text x="${pl+iw-4}" y="${pt+ih+16}" class="ax" text-anchor="end">Sell and build →</text>`;
+  g+=`<text x="${pl+iw/2}" y="${pt+ih+32}" class="ax" text-anchor="middle">Stance toward the site</text>`;
+  g+=`<text transform="translate(12 ${pt+ih/2}) rotate(-90)" class="ax" text-anchor="middle">Leverage →</text>`;
+  list.forEach(s=>{const x=X(s.pos[0]),y=Y(s.pos[1]),c=catColor(s.cat),on=s.id===shSel;
+    g+=`<g class="dot" data-sh="${s.id}" tabindex="0" role="button" aria-label="${s.name}"><title>${s.name}</title><circle cx="${x}" cy="${y}" r="${on?8:5.5}" fill="${s.unknown?"var(--panel)":c}" stroke="${c}" stroke-width="2"/>${labelled.has(s.id)||on?`<text x="${x+(s.pos[0]>.3?-9:9)}" y="${y+4}" class="dl" text-anchor="${s.pos[0]>.3?"end":"start"}">${SHORT[s.id]||s.name}</text>`:""}</g>`;});
+  g+=`</svg>`;
+  return `<figure class="pmap">${g}<figcaption>Hollow dots: stance unknown. Placement is our qualitative reading of the public record, not measured data.</figcaption></figure>`;
+}
+function shCard(s){return `<button class="shc" data-sh="${s.id}" style="--cc:${catColor(s.cat)}"><span class="g">${CAT[s.cat].glyph}</span><span class="t"><b>${s.name}</b><span>${s.role}</span></span></button>`;}
+function renderSH(){
+  let html="";
+  if(shSel){
+    const s=SHBYID[shSel];
+    html+=`<button class="back" data-back="1">← All stakeholders</button><div class="kicker" style="color:${catColor(s.cat)}"><span class="sw" style="background:${catColor(s.cat)}"></span>${CAT[s.cat].label}</div><h3>${s.name}</h3><div class="en">${s.role}</div>`;
+    html+=`<dl class="facts"><dt>Interest</dt><dd>${s.interest}</dd><dt>Stance</dt><dd>${s.stance}</dd><dt>Leverage</dt><dd>${s.lev}</dd><dt>In the model</dt><dd class="pills">${s.objs.map(id=>`<button class="chip" data-goto="${id}">${BYID[id].name}</button>`).join("")}</dd></dl>`;
+    html+=`<h4>Sources</h4><ul class="docs">${s.src.map(([t,u])=>`<li>${L(t,u)}</li>`).join("")}</ul>`;
+  }else if(shFocus){
+    const o=BYID[shFocus], list=SH.filter(s=>s.objs.includes(shFocus));
+    html+=`<button class="back" data-back="1">← All stakeholders</button><div class="kicker">Stakeholders tied to</div><h3>${o.name}</h3>`;
+    ["vote","money","culture"].forEach(c=>{const l=list.filter(s=>s.cat===c);if(l.length)html+=`<h4 style="color:${catColor(c)}">${CAT[c].label}</h4><div class="shl">${l.map(shCard).join("")}</div>`;});
+    if(!list.length) html+=`<p>No stakeholders are linked to this object yet.</p>`;
+    html+=`<button class="btn" data-rec="${shFocus}">Open this building's records</button>`;
+  }else{
+    html+=`<div class="kicker">Who decides what happens here</div><h3>Stakeholders</h3><p class="lede">Grouped by the three kinds of power used in our studio: people who vote, people who make money, and people who have cultural power. Click a dot, a card or a pin in the model.</p>`;
+    html+=powerMap();
+    ["vote","money","culture"].filter(c=>shFilter==="all"||shFilter===c).forEach(c=>{const l=SH.filter(s=>s.cat===c);
+      html+=`<section class="shs"><h4 style="color:${catColor(c)}"><span class="g" style="--cc:${catColor(c)}">${CAT[c].glyph}</span>${CAT[c].label} <span class="cnt">${l.length}</span></h4><p class="src">${CAT[c].blurb}</p><div class="shl">${l.map(shCard).join("")}</div></section>`;});
+    html+=`<p class="callout"><b>Key tension.</b> The actor with the most leverage (CRA/LA) is required by state law to sell, while the most organized public voices want a park. The council member who could broker a city purchase has not taken a public position.</p>`;
+  }
+  $("#dossier").innerHTML=html;
+}
+function renderDossier(){
+  if(mode==="sh"){renderSH(); if(window.repaint) repaint(); return;}
+  const o=BYID[selected];
+  let html=`<div class="kicker"><span class="sw" style="background:${o.sw}"></span>${o.grp}</div><h3>${o.name}</h3><div class="en">${o.en}</div><div class="pills">${o.pills.map(([c,t])=>`<span class="pill ${c}">${t}</span>`).join("")}</div>`;
+  if(o.tabs){
+    html+=`<div class="tabs" role="tablist">${Object.keys(o.tabs).map(k=>`<button class="tab" role="tab" aria-selected="${k===siteTab}" data-tab="${k}">${TABNAMES[k]}</button>`).join("")}</div><div>${o.tabs[siteTab]}</div>`;
+  }else{
+    html+=`<dl class="facts">${o.facts.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>`+o.body.map(p=>`<p>${p}</p>`).join("")+`<h4>Records and sources</h4><ul class="docs">${o.docs.map(([t,u])=>`<li>${L(t,u)}</li>`).join("")}</ul>`;
+    if(!visibleNow(o)) html+=`<p class="callout">${o.plan?"Hidden. Tick “Show Angels Landing proposal” below to see it.":`Not standing in ${year}.`}</p>`;
+  }
+  const n=SH.filter(s=>s.objs.includes(selected));
+  if(n.length) html+=`<h4>Stakeholders</h4><div class="shl">${n.map(shCard).join("")}</div>`;
+  $("#dossier").innerHTML=html;
+  if(window.repaint) repaint();
+}
+function setMode(m){mode=m; if(m==="sh"&&year<2018) year=2026; renderPicker(); setYear(year); if(window.applyVisibility) applyVisibility();}
+$("#modeSw").addEventListener("click",e=>{const b=e.target.closest(".seg"); if(b) setMode(b.dataset.mode);});
+$("#picker").addEventListener("click",e=>{const b=e.target.closest(".chip"); if(!b) return; if(b.dataset.filter){shFilter=b.dataset.filter; shSel=null; shFocus=null; renderPicker(); renderDossier(); return;} select(b.dataset.id,true);});
+function openSH(id){mode="sh"; shSel=id; shFocus=null; renderPicker(); renderDossier(); if(window.applyVisibility) applyVisibility(); if(window.focusObj) focusObj(SHBYID[id].objs[0],true);}
+$("#dossier").addEventListener("click",e=>{
+  const t=e.target.closest(".tab"); if(t){siteTab=t.dataset.tab; renderDossier(); return;}
+  const d=e.target.closest("[data-sh]"); if(d){openSH(d.dataset.sh); return;}
+  if(e.target.closest("[data-back]")){shSel=null; shFocus=null; renderDossier(); return;}
+  const go=e.target.closest("[data-goto]"); if(go){shSel=null; shFocus=go.dataset.goto; {const o=BYID[shFocus]; if(o.plan&&!showPlan){showPlan=true;$("#plan").checked=true;} else if(!o.plan&&!visibleNow(o)) setYear(Math.min(o.years[1]-1,Math.max(o.years[0],1914)));} renderDossier(); if(window.focusObj) focusObj(go.dataset.goto,true); return;}
+  const r=e.target.closest("[data-rec]"); if(r){mode="records"; select(r.dataset.rec,true); renderPicker(); if(window.applyVisibility) applyVisibility(); return;}
+});
+$("#dossier").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.closest(".dot")){e.preventDefault(); openSH(e.target.closest(".dot").dataset.sh);}});
+function setYear(y){
+  year=y; $("#year").value=y; $("#yearBig").textContent=y;
+  let cap=""; for(const [my,t] of MILESTONES) if(my<=y) cap=`${my} · ${t}`;
+  $("#yearCap").textContent=cap;
+  document.querySelectorAll("#presets .btn").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.y===y)));
+  if(window.applyVisibility) applyVisibility();
+  renderPicker(); renderDossier();
+}
+$("#presets").innerHTML=[1906,1965,1996,2026].map(y=>`<button class="btn" data-y="${y}">${y}</button>`).join("");
+$("#presets").addEventListener("click",e=>{const b=e.target.closest(".btn"); if(b) setYear(+b.dataset.y);});
+$("#year").addEventListener("input",e=>setYear(+e.target.value));
+$("#plan").addEventListener("change",e=>{showPlan=e.target.checked; setYear(showPlan&&year<2018?2026:year);});
+function select(id,fromList){
+  if(mode==="sh"&&!fromList){shSel=null; shFocus=id; renderDossier(); if(window.focusObj) focusObj(id,false); return;}
+  const o=BYID[id];
+  if(fromList&&!visibleNow(o)){
+    if(o.plan){showPlan=true; $("#plan").checked=true; if(year<2018) year=2026;}
+    else year=o.years[1]<9999?Math.min(o.years[1]-1,Math.max(o.years[0],1914)):Math.max(o.years[0],2026);
+  }
+  selected=id; if(id==="site") siteTab="Overview";
+  setYear(year);
+  if(window.focusObj) focusObj(id,fromList);
+}
+/* hooks used by the 3D scene */
+window.shState=()=>{
+  if(mode!=="sh") return null;
+  if(shSel){const s=SHBYID[shSel]; return {ids:new Set(s.objs),color:catColor(s.cat),marker:s.objs[0]};}
+  if(shFocus) return {ids:new Set([shFocus]),color:null,marker:shFocus};
+  if(shFilter!=="all") return {ids:new Set(SH.filter(s=>s.cat===shFilter).flatMap(s=>s.objs)),color:catColor(shFilter),marker:null};
+  return {ids:new Set(),color:null,marker:null};
+};
+
+
+/* ================= 3D ================= */
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+(function init3D(){
+  if(!window.THREE||!THREE.OrbitControls){$("#fallback").hidden=false;return;}
+  const canvas=$("#gl"); let renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas,antialias:true});}catch(e){$("#fallback").hidden=false;return;}
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.12;
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(24,1,5,30000);
+  cam.position.set(1350,1300,1450);
+  const controls=new THREE.OrbitControls(cam,canvas);
+  controls.target.set(-200,60,-220); controls.enableDamping=true; controls.maxPolarAngle=Math.PI*0.44; controls.minDistance=180; controls.maxDistance=5000;
+
+  // seeded random
+  let seed=7; const rnd=()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+  const C=c=>new THREE.Color(c).convertSRGBToLinear();
+
+  // toon ramp
+  const gm=new THREE.DataTexture(new Uint8Array([95,95,95,255,175,175,175,255,255,255,255,255]),3,1,THREE.RGBAFormat);
+  gm.minFilter=gm.magFilter=THREE.NearestFilter; gm.generateMipmaps=false; gm.needsUpdate=true;
+  const nightMats=[];
+  const toon=(color,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:C(color),roughness:.86,metalness:0},o));
+  const markNight=m=>{m.userData.night=true;nightMats.push(m);};
+
+  // lights
+  const hemi=new THREE.HemisphereLight(0xffffff,0x9aa7b8,0.55); scene.add(hemi);
+  scene.add(new THREE.AmbientLight(0xffffff,.12));
+  const sun=new THREE.DirectionalLight(0xfff1dc,1.55); sun.position.set(1000,1700,700); sun.castShadow=true;
+  sun.shadow.mapSize.set(4096,4096); Object.assign(sun.shadow.camera,{left:-1300,right:1300,top:1300,bottom:-1300,near:100,far:5000}); sun.shadow.bias=-0.0006; scene.add(sun);
+
+  /* ---------- facade textures (2 bays x 2 floors per tile) ---------- */
+  const T=128, texCache={};
+  function shade(hex,amt){const c=new THREE.Color(hex);const hsl={};c.getHSL(hsl);c.setHSL(hsl.h,hsl.s,Math.max(0,Math.min(1,hsl.l+amt/100)));return "#"+c.getHexString();}
+  function glass(g,x,y,w,h,st){const gr=g.createLinearGradient(0,y,0,y+h);gr.addColorStop(0,st.glassHi||"#cfe9f6");gr.addColorStop(.45,st.glass||"#6f93b8");gr.addColorStop(1,shade(st.glass||"#6f93b8",-18));g.fillStyle=gr;g.fillRect(x,y,w,h);g.fillStyle="rgba(255,255,255,.35)";g.beginPath();g.moveTo(x+w*.15,y);g.lineTo(x+w*.4,y);g.lineTo(x+w*.1,y+h*.6);g.lineTo(x,y+h*.6);g.closePath();g.fill();}
+  const STY={
+    cream:{wall:"#eadfc8",trim:"#f8f1e1",glass:"#6d8fb5",kind:"arch"},
+    sand:{wall:"#e3cfa6",trim:"#f3e6c9",glass:"#6d8fb5",kind:"punched"},
+    brickTan:{wall:"#c58f6a",trim:"#f0e2c8",glass:"#5f84ad",kind:"punched",brick:1},
+    brickBrown:{wall:"#9b5d45",trim:"#e6d6ba",glass:"#5f84ad",kind:"double",brick:1},
+    buff:{wall:"#d1b089",trim:"#f2e5cc",glass:"#5f84ad",kind:"punched",brick:1},
+    deco:{wall:"#ebe6da",trim:"#ffffff",glass:"#55708f",kind:"pier",spandrel:"#7b8796"},
+    stone:{wall:"#d8cbb2",trim:"#efe6d4",glass:"#5f84ad",kind:"arch"},
+    calplaza:{wall:"#c79287",trim:"#e0b2a6",glass:"#4f98a6",glassHi:"#c6f1f2",kind:"curtain"},
+    modern:{wall:"#d9d4cc",trim:"#eeeae3",glass:"#5c87a8",kind:"ribbon"},
+    modern2:{wall:"#b9c4cc",trim:"#dfe5ea",glass:"#4f7ea5",kind:"ribbon"},
+    parking:{wall:"#cfcac2",trim:"#e6e2db",kind:"parking"},
+    store:{wall:"#e9dcc4",trim:"#fbf4e6",glass:"#7da0c3",kind:"store",awning:"#2f7d6b"},
+    storeRed:{wall:"#b4553f",trim:"#efe0c6",glass:"#7da0c3",kind:"store",awning:"#c23b2e",brick:1},
+    storeTan:{wall:"#c9a27a",trim:"#efe0c6",glass:"#7da0c3",kind:"store",awning:"#2b5c9e",brick:1},
+    brickRed:{wall:"#a8513d",trim:"#efe0c6",glass:"#5f84ad",kind:"bay",brick:1},
+    victorianA:{wall:"#d7a6a0",trim:"#fbf6ee",glass:"#4f6f95",kind:"clap"},
+    victorianB:{wall:"#9fbfa8",trim:"#fbf6ee",glass:"#4f6f95",kind:"clap"},
+    victorianC:{wall:"#e8cf8e",trim:"#fbf6ee",glass:"#4f6f95",kind:"clap"},
+    victorianD:{wall:"#a7b4d6",trim:"#fbf6ee",glass:"#4f6f95",kind:"clap"},
+    hotelWood:{wall:"#d9b8a0",trim:"#fbf3e6",glass:"#4f6f95",kind:"clap"},
+    ashlar:{wall:"#b8aa92",kind:"ashlar"}
+  };
+  function makeFacade(name){
+    if(texCache[name]) return texCache[name];
+    const st=STY[name];
+    const c=document.createElement("canvas");c.width=c.height=T;const g=c.getContext("2d");
+    const m=document.createElement("canvas");m.width=m.height=T;const k=m.getContext("2d");k.fillStyle="#000";k.fillRect(0,0,T,T);
+    g.fillStyle=st.wall;g.fillRect(0,0,T,T);
+    if(st.brick){g.fillStyle=shade(st.wall,-7);for(let y=0;y<T;y+=5){g.fillRect(0,y,T,1);}}
+    const cell=T/2;
+    for(let cy=0;cy<2;cy++)for(let cx=0;cx<2;cx++){
+      const x=cx*cell,y=cy*cell, lit=((cx+cy*2+name.length)%3)!==0;
+      const win=(wx,wy,ww,wh,arch)=>{glass(g,wx,wy,ww,wh,st); if(arch){g.fillStyle=st.wall;g.beginPath();g.rect(wx,wy,ww,ww/2);g.fill();g.save();g.beginPath();g.arc(wx+ww/2,wy+ww/2,ww/2,Math.PI,0);g.clip();glass(g,wx,wy,ww,ww/2+1,st);g.restore();}
+        if(lit){k.fillStyle="#fff";k.fillRect(wx,wy+(arch?ww/2:0),ww,wh-(arch?ww/2:0));}};
+      switch(st.kind){
+        case "punched": win(x+18,y+14,28,34); g.fillStyle=st.trim; g.fillRect(x+15,y+48,34,4); g.fillRect(x+15,y+10,34,4); break;
+        case "double": win(x+10,y+14,18,34); win(x+36,y+14,18,34); g.fillStyle=st.trim; g.fillRect(x+8,y+48,48,4); break;
+        case "arch": win(x+17,y+10,30,40,true); g.fillStyle=st.trim; g.fillRect(x+14,y+50,36,4); g.fillRect(x,y+60,cell,4); break;
+        case "bay": g.fillStyle=shade(st.wall,8); g.fillRect(x+10,y+6,44,52); win(x+14,y+12,10,36); win(x+27,y+12,10,36); win(x+40,y+12,10,36); g.fillStyle=st.trim; g.fillRect(x+8,y+50,48,4); break;
+        case "pier": g.fillStyle=st.spandrel; g.fillRect(x+12,y+44,40,18); win(x+12,y+4,40,40); g.fillStyle=st.trim; g.fillRect(x,y,10,cell); g.fillRect(x+cell-10,y,10,cell); g.fillRect(x+30,y,4,cell); break;
+        case "curtain": glass(g,x,y,cell,cell,st); if(lit){k.fillStyle="#fff";k.fillRect(x,y,cell,cell*.78);} g.fillStyle=st.wall; g.fillRect(x,y+cell*.78,cell,cell*.22); g.fillStyle=st.trim; g.fillRect(x,y+cell*.78,cell,2); g.fillRect(x+cell-2,y,2,cell*.78); break;
+        case "ribbon": g.fillStyle=st.wall; g.fillRect(x,y,cell,cell); glass(g,x,y+16,cell,30,st); if(lit){k.fillStyle="#fff";k.fillRect(x,y+16,cell,30);} g.fillStyle=st.trim; g.fillRect(x+cell-3,y+16,3,30); break;
+        case "parking": g.fillStyle=st.wall; g.fillRect(x,y,cell,cell); g.fillStyle="#3b3f45"; g.fillRect(x,y+20,cell,30); g.fillStyle=st.trim; g.fillRect(x+cell-6,y+20,6,30); if(lit){k.fillStyle="#666";k.fillRect(x,y+20,cell,30);} break;
+        case "store": g.fillStyle=st.trim; g.fillRect(x,y,cell,cell); glass(g,x+6,y+22,cell-12,38,st); if(true){k.fillStyle="#fff";k.fillRect(x+6,y+22,cell-12,38);} g.fillStyle=st.awning; g.fillRect(x+2,y+8,cell-4,12); g.fillStyle="rgba(255,255,255,.55)"; for(let i=0;i<cell-4;i+=10) g.fillRect(x+2+i,y+8,5,12); g.fillStyle=st.wall; g.fillRect(x,y,cell,6); break;
+        case "clap": g.fillStyle=shade(st.wall,-9); for(let yy=y;yy<y+cell;yy+=6) g.fillRect(x,yy,cell,1); g.fillStyle=st.trim; g.fillRect(x+19,y+8,26,46); win(x+22,y+11,20,40); g.fillRect(x+31,y+11,2,40); break;
+        case "ashlar": g.fillStyle=shade(st.wall,-14); for(let yy=0;yy<cell;yy+=12){for(let xx=(yy/12)%2?0:10;xx<cell;xx+=20){g.fillRect(x+xx,y+yy,1,12);} g.fillRect(x,y+yy,cell,1);} break;
+      }
+    }
+    const tex=new THREE.CanvasTexture(c); tex.encoding=THREE.sRGBEncoding; tex.wrapS=tex.wrapT=THREE.RepeatWrapping; tex.anisotropy=4;
+    const mask=new THREE.CanvasTexture(m); mask.wrapS=mask.wrapT=THREE.RepeatWrapping;
+    return texCache[name]={tex,mask,st};
+  }
+  const matCache={};
+  function facadeMat(name,rx,ry){
+    rx=Math.max(.5,Math.round(rx*2)/2); ry=Math.max(.5,Math.round(ry*2)/2);
+    const key=name+"|"+rx+"|"+ry; if(matCache[key]) return matCache[key];
+    const f=makeFacade(name); const t=f.tex.clone(); t.needsUpdate=true; t.repeat.set(rx,ry); const mk=f.mask.clone(); mk.needsUpdate=true; mk.repeat.set(rx,ry);
+    const m=toon("#ffffff",{map:t,emissive:C("#ffc56e"),emissiveMap:mk,emissiveIntensity:0}); markNight(m); return matCache[key]=m;
+  }
+
+  /* ---------- registry ---------- */
+  const parts={}, pickables=[], hulls=[];
+  const hullBase=new THREE.MeshBasicMaterial({color:C("#26303d"),side:THREE.BackSide});
+  const hullSel=new THREE.MeshBasicMaterial({color:C("#2f6fe0"),side:THREE.BackSide});
+  const hullHov=new THREE.MeshBasicMaterial({color:C("#6b9cf0"),side:THREE.BackSide});
+  function hull(){return null;
+  function _unused(mesh,w,h,d,t=1.1){const hm=new THREE.Mesh(mesh.geometry,hullBase);hm.scale.set((w+2*t)/w,(h+2*t)/h,(d+2*t)/d);hm.userData.isHull=true;mesh.add(hm);hulls.push(hm);return hm;}}
+  function reg(id,obj,yr){obj.userData.yr=yr||null; if(id) obj.traverse(o=>{if(o.isMesh&&o.material){const cl=mt=>{const c=mt.clone(); if(c.color) c.userData.base=c.color.clone(); return c;}; o.material=Array.isArray(o.material)?o.material.map(cl):cl(o.material);}}); (parts[id||"_ctx"]=parts[id||"_ctx"]||[]).push(obj); obj.traverse(o=>{if(o.isMesh){o.userData.pid=id; if(!o.userData.isHull){o.castShadow=true;o.receiveShadow=true;} if(id) pickables.push(o);}}); scene.add(obj); return obj;}
+  function plainBox(x0,x1,y0,y1,z0,z1,color,o={}){const w=x1-x0,h=y1-y0,d=z1-z0;const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),o.mat||toon(color,o.mo||{}));m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);if(o.hull!==false&&Math.min(w,h,d)>2.5)hull(m,w,h,d,o.t);return m;}
+  function faceBox(x0,x1,y0,y1,z0,z1,style,floorH,bayW,roof){
+    const w=x1-x0,h=y1-y0,d=z1-z0;
+    const sx=facadeMat(style,d/bayW/2,h/floorH/2), sz=facadeMat(style,w/bayW/2,h/floorH/2), r=toon(roof||"#a3a7ab",{roughness:.95});
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),[sx,sx,r,r,sz,sz]); m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2); hull(m,w,h,d); return m;
+  }
+  function building(o){
+    const g=new THREE.Group(); let y=o.y0; const fh=o.floorH||13, bw=o.bayW||16;
+    if(o.y0<3) g.add(aoDecal(o.x0,o.x1,o.z0,o.z1,o.y0<0?-0.25:o.y0+0.3));
+    if(o.parapet===undefined&&!o.cornice) o.parapet='#cfd2d5';
+    if(o.hvac===undefined) o.hvac=Math.min(8,Math.round((o.x1-o.x0)*(o.z1-o.z0)/4500));
+    if(o.base){g.add(faceBox(o.x0,o.x1,y,y+o.base.h,o.z0,o.z1,o.base.style,o.base.floorH||o.base.h,o.base.bayW||bw,o.roof)); y+=o.base.h; g.add(plainBox(o.x0-1.5,o.x1+1.5,y-1.2,y+1.2,o.z0-1.5,o.z1+1.5,o.trim||"#efe6d4",{hull:false}));}
+    g.add(faceBox(o.x0,o.x1,y,o.y1,o.z0,o.z1,o.style,fh,bw,o.roof));
+    if(o.cornice) g.add(plainBox(o.x0-3,o.x1+3,o.y1-4,o.y1+1.5,o.z0-3,o.z1+3,o.cornice));
+    if(o.parapet) g.add(plainBox(o.x0,o.x1,o.y1+1.5,o.y1+5,o.z0,o.z1,o.parapet,{hull:false}));
+    const top=o.y1+(o.parapet?5:1.5);
+    if(o.tank){const t=new THREE.Group();const tank=new THREE.Mesh(new THREE.CylinderGeometry(7,7,12,10),toon("#8a6a4a"));tank.position.y=16;const cone=new THREE.Mesh(new THREE.ConeGeometry(7.6,5,10),toon("#5d4a3a"));cone.position.y=24.5;t.add(tank,cone);[[-5,-5],[5,-5],[-5,5],[5,5]].forEach(([a,b])=>{const l=new THREE.Mesh(new THREE.BoxGeometry(1,10,1),toon("#3a3a3a"));l.position.set(a,5,b);t.add(l);});t.position.set(o.x0+(o.x1-o.x0)*.7,top,o.z0+(o.z1-o.z0)*.3);g.add(t);}
+    for(let i=0;i<(o.hvac||0);i++){const w=8+rnd()*8,d=6+rnd()*6;const cx=o.x0+12+rnd()*(o.x1-o.x0-24),cz=o.z0+12+rnd()*(o.z1-o.z0-24);const hh=4+rnd()*3;g.add(plainBox(cx-w/2,cx+w/2,top,top+hh,cz-d/2,cz+d/2,"#dfe1e3"));const fan=new THREE.Mesh(new THREE.CylinderGeometry(Math.min(w,d)*.3,Math.min(w,d)*.3,.6,14),toon("#5d6268"));fan.position.set(cx,top+hh+.3,cz);g.add(fan);}
+    if(o.extra) o.extra(g,top);
+    return g;
+  }
+  function signPlane(text,w,h,fg,bg,font="800 64px Archivo, Arial",vertical=false){
+    const c=document.createElement("canvas");c.width=vertical?128:1024;c.height=vertical?1024:Math.round(1024*h/w);
+    const draw=()=>{const g=c.getContext("2d");g.clearRect(0,0,c.width,c.height);if(bg){g.fillStyle=bg;g.fillRect(0,0,c.width,c.height);}g.fillStyle=fg;g.textAlign="center";g.textBaseline="middle";g.font=font;
+      if(vertical){const ch=[...text];const step=c.height/(ch.length+1);ch.forEach((t,i)=>g.fillText(t,64,step*(i+1)));}else g.fillText(text,c.width/2,c.height/2+4);tex.needsUpdate=true;};
+    const tex=new THREE.CanvasTexture(c);tex.encoding=THREE.sRGBEncoding;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex,transparent:!bg,side:THREE.DoubleSide,toneMapped:false}));
+    draw(); signDraws.push(draw); return m;
+  }
+  const signDraws=[];
+
+  /* ---------- terrain ---------- */
+  const prof=[[-40,0],[-80,5],[-230,55],[-340,70]];
+  const h=x=>{if(x>=-40)return 0;if(x<=-340)return 70;for(let i=0;i<prof.length-1;i++){const [a,ha]=prof[i],[b,hb]=prof[i+1];if(x<=a&&x>=b)return ha+(hb-ha)*(a-x)/(a-b);}return 0;};
+  function slab(z0,z1,mat){const s=new THREE.Shape();s.moveTo(-40,-1);s.lineTo(-40,0);prof.slice(1).forEach(([x,y])=>s.lineTo(x,y));s.lineTo(-340,-1);s.lineTo(-40,-1);
+    const g=new THREE.ExtrudeGeometry(s,{depth:z1-z0,bevelEnabled:false});const m=new THREE.Mesh(g,mat);m.position.z=z0;return m;}
+
+  // ground
+  const groundMat=toon("#c9d3c0"); const ground=new THREE.Mesh(new THREE.PlaneGeometry(9000,9000),groundMat); ground.rotation.x=-Math.PI/2; ground.position.y=-1.4; ground.receiveShadow=true; scene.add(ground);
+  const asphalt=toon("#4c5058",{roughness:.95}), walk=toon("#cfd0cd"), stripe=toon("#f1f1ee"), yellow=toon("#e3bf4a");
+  function road(x0,x1,z0,z1,alongZ){const m=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,z1-z0),asphalt);m.rotation.x=-Math.PI/2;m.position.set((x0+x1)/2,-0.9,(z0+z1)/2);m.receiveShadow=true;scene.add(m);
+    // center line + dashes
+    if(alongZ){const cx=(x0+x1)/2;const l=new THREE.Mesh(new THREE.PlaneGeometry(1.4,z1-z0),yellow);l.rotation.x=-Math.PI/2;l.position.set(cx,-0.8,(z0+z1)/2);scene.add(l);for(let z=z0;z<z1;z+=40){[cx-20,cx+20].forEach(xx=>{const d=new THREE.Mesh(new THREE.PlaneGeometry(1,14),stripe);d.rotation.x=-Math.PI/2;d.position.set(xx,-0.8,z);scene.add(d);});}}
+    else{const cz=(z0+z1)/2;const l=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0,1.4),yellow);l.rotation.x=-Math.PI/2;l.position.set((x0+x1)/2,-0.8,cz);scene.add(l);for(let x=x0;x<x1;x+=40){[cz-20,cz+20].forEach(zz=>{const d=new THREE.Mesh(new THREE.PlaneGeometry(14,1),stripe);d.rotation.x=-Math.PI/2;d.position.set(x,-0.8,zz);scene.add(d);});}}}
+  function crosswalk(cx,cz,alongZ,len){for(let i=-len/2;i<len/2;i+=6){const s=new THREE.Mesh(new THREE.PlaneGeometry(alongZ?3.5:12,alongZ?12:3.5),stripe);s.rotation.x=-Math.PI/2;s.position.set(alongZ?cx+i:cx,-0.75,alongZ?cz:cz+i);scene.add(s);}}
+  road(-30,30,-1400,1400,true); road(352,408,-1400,1400,true); road(-1400,1000,12,68,false); road(-1400,1000,-728,-672,false); road(-1400,1000,632,688,false);
+  // sidewalks (blocks raised slightly)
+  [[40,340,-660,0],[40,340,80,620],[40,340,-1400,-740],[420,900,-1400,1400],[-340,-40,80,620],[-780,-400,80,620],[40,340,700,1400],[-780,-40,700,1400]].forEach(([x0,x1,z0,z1])=>{const m=plainBox(x0-12,x1+12,-1.4,-0.3,z0-12,z1+12,"#d7d4cc",{hull:false,mat:walk});m.receiveShadow=true;scene.add(m);});
+  crosswalk(0,-14,true,56);crosswalk(0,94,true,56);
+  // Pershing Square (green, south of 5th)
+  const ps=plainBox(-340,-40,-1,1,700,1100,"#8fbf6e",{hull:false}); scene.add(ps);
+
+  // site slab (color changes by era)
+  const siteMat=toon("#8cc06a"); const siteSlab=reg("site",slab(-330,0,siteMat));
+  const northMat=toon("#cfc8b8"); reg(null,slab(-660,-330,northMat));
+  // elevated Olive St + California Plaza podium
+  scene.add(plainBox(-400,-340,-1,70,-1000,80,"#6f7680",{mat:toon("#a4a9b0")}));
+  const pod=plainBox(-780,-400,-1,95,-760,-10,"#d8d0c4",{mat:toon("#d8d0c4")}); reg(null,pod,[1985,9999]);
+  // Watercourt
+  const water=plainBox(-700,-520,95,97,-520,-380,"#6cc3e0",{hull:false,mat:toon("#6cc3e0",{emissive:C("#2a7fb0"),emissiveIntensity:.15})}); reg("cp2",water,[1992,9999]);
+  for(let i=0;i<9;i++){const j=new THREE.Mesh(new THREE.CylinderGeometry(.8,1.6,10+rnd()*14,6),new THREE.MeshBasicMaterial({color:C("#e9fbff"),transparent:true,opacity:.85}));j.position.set(-690+i*20,102,-450+(i%2)*16);reg("cp2",j,[1992,9999]);}
+
+  /* ---------- trees ---------- */
+  const leafCols=["#6fb24a","#86c454","#5a9e44","#9ccf5e"], trunkMat=toon("#7a5a3e");
+  function tree(id,x,y,z,s=1,cols=leafCols,yr){
+    const g=new THREE.Group(); const tr=new THREE.Mesh(new THREE.CylinderGeometry(1.1*s,1.6*s,14*s,6),trunkMat); tr.position.y=7*s; g.add(tr);
+    const n=3+Math.floor(rnd()*2);
+    for(let i=0;i<n;i++){const r=(7+rnd()*4)*s;const b=new THREE.Mesh(new THREE.IcosahedronGeometry(r,2),toon(cols[Math.floor(rnd()*cols.length)]));b.position.set((rnd()-.5)*9*s,(16+rnd()*7)*s,(rnd()-.5)*9*s);g.add(b);}
+    g.position.set(x,y,z); g.rotation.y=rnd()*6; return reg(id,g,yr);
+  }
+  const palmLeaf=toon("#5e9a3f");
+  function palm(x,z,hgt=60){const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(.9,1.4,hgt,6),toon("#9b7b58"));tr.position.y=hgt/2;g.add(tr);
+    for(let i=0;i<8;i++){const p=new THREE.Group();const lf=new THREE.Mesh(new THREE.BoxGeometry(16,.5,3.2),palmLeaf);lf.position.x=8;p.add(lf);p.rotation.y=i*Math.PI/4;p.rotation.z=-.45;p.position.y=hgt;g.add(p);}
+    g.position.set(x,-0.3,z);return reg(null,g);}
+  const jac=["#9d84d6","#b39be6","#8a72c6"];
+
+  /* ---------- site landscape ---------- */
+  // paths (from 1984)
+  const pathMat=toon("#e7dcc4");
+  function pathSeg(x0,z0,x1,z1,w=9){const y0=h(x0)+.5,y1=h(x1)+.5;const len=Math.hypot(x1-x0,z1-z0,y1-y0);const m=new THREE.Mesh(new THREE.BoxGeometry(w,1,len),pathMat);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);m.lookAt(x1,y1,z1);m.receiveShadow=true;return reg("site",m,[1984,9999]);}
+  const pts=[[-60,-70],[-150,-120],[-105,-200],[-235,-170],[-200,-265],[-320,-240]]; for(let i=0;i<pts.length-1;i++) pathSeg(...pts[i],...pts[i+1]);
+  // benches and lamps
+  [[-245,-150],[-290,-230],[-210,-280],[-160,-110]].forEach(([x,z])=>{const g=new THREE.Group();g.add(plainBox(-5,5,2,3,-1.5,1.5,"#8a5e3b",{t:.4}));g.add(plainBox(-5,5,3,6,1,1.8,"#8a5e3b",{t:.4}));g.add(plainBox(-4.5,-3.5,0,2,-1,1,"#333",{hull:false}));g.add(plainBox(3.5,4.5,0,2,-1,1,"#333",{hull:false}));g.position.set(x,h(x),z);g.rotation.y=.4;reg("site",g,[1986,9999]);});
+  // trees on the knoll (park era)
+  for(let i=0;i<34;i++){let x,z,ok=false,t=0;while(!ok&&t++<40){x=-325+rnd()*270;z=-315+rnd()*300;ok=!(x>-110&&z>-60)&&!(z<-300);}
+    const cols=rnd()<.18?jac:leafCols; tree("site",x,h(x),z,.85+rnd()*.5,cols,[1990,9999]);}
+  // hedges near Hill edge
+  for(let z=-300;z<-70;z+=26){const b=new THREE.Mesh(new THREE.IcosahedronGeometry(5,1),toon("#4f8a4a"));b.scale.y=.6;b.position.set(-52,3,z);reg("site",b,[1990,9999]);}
+  // fence (from 2013)
+  const fenceMat=toon("#2b2f36");
+  function fenceLine(x0,z0,x1,z1){const n=Math.ceil(Math.hypot(x1-x0,z1-z0)/14);for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n,z=z0+(z1-z0)*i/n;const p=new THREE.Mesh(new THREE.BoxGeometry(.8,8,.8),fenceMat);p.position.set(x,h(x)+4,z);reg("site",p,[2013,9999]);}
+    for(const yy of [2.5,7.5]){const y0=h(x0)+yy,y1=h(x1)+yy;const len=Math.hypot(x1-x0,z1-z0,y1-y0);const r=new THREE.Mesh(new THREE.BoxGeometry(.5,.5,len),fenceMat);r.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);r.lookAt(x1,y1,z1);reg("site",r,[2013,9999]);}}
+  fenceLine(-44,-312,-44,-58); fenceLine(-44,-58,-100,-58); fenceLine(-100,-58,-100,-4); fenceLine(-100,-4,-336,-4); fenceLine(-336,-4,-336,-312);
+  // era decor: dirt mounds (1964-72) and parking lot (1965-84)
+  for(let i=0;i<6;i++){const x=-280+rnd()*200,z=-280+rnd()*240;const m=new THREE.Mesh(new THREE.ConeGeometry(18+rnd()*14,10+rnd()*8,7),toon("#a98d68"));m.position.set(x,h(x)+4,z);reg("site",m,[1964,1973]);}
+  const lot=plainBox(-110,-45,0,1.2,-300,-80,"#5f646b",{hull:false}); reg("site",lot,[1965,1984]);
+
+  // north half of block: plaza + trees after 1996
+  for(let i=0;i<10;i++){const x=-320+rnd()*260,z=-640+rnd()*280;tree(null,x,h(x),z,.9,leafCols,[1996,9999]);}
+
+  // street trees & palms
+  for(let z=-620;z<-40;z+=60) tree(null,52,0,z,.75,leafCols);
+  for(let z=110;z<600;z+=60){tree(null,52,0,z,.75,leafCols);}
+  for(let x=-320;x<-60;x+=55) palm(x,90,52+rnd()*14);
+  for(let x=60;x<330;x+=60) palm(x,-10,55+rnd()*12);
+  for(let z=720;z<1080;z+=55){tree(null,-320+rnd()*260,0,z,1,rnd()<.4?jac:leafCols);}
+  for(let i=0;i<10;i++){const x=-760+rnd()*340,z=-740+rnd()*700;if(!(x>-660&&x<-480&&((z>-710&&z<-550)||(z>-340&&z<-160))))tree(null,x,95,z,.8,rnd()<.3?jac:leafCols,[1985,9999]);}
+
+  /* ---------- Angels Flight ---------- */
+  function funicular(id,z,yr){
+    const g=new THREE.Group(); const x0=-40,y0=6,x1=-344,y1=98; const len=Math.hypot(x1-x0,y1-y0), ang=Math.atan2(y1-y0,x1-x0);
+    const deck=new THREE.Mesh(new THREE.BoxGeometry(len,3,13),toon("#3b3d42")); deck.position.set((x0+x1)/2,(y0+y1)/2,z); deck.rotation.z=ang; g.add(deck); hull(deck,len,3,13,.6);
+    for(const dz of [-4,4]){const r=new THREE.Mesh(new THREE.BoxGeometry(len,1,1),toon("#b8bcc4"));r.position.set((x0+x1)/2,(y0+y1)/2+2,z+dz);r.rotation.z=ang;g.add(r);}
+    for(let t=.06;t<1;t+=.12){const x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;const base=h(x);if(y-base>4){const p=new THREE.Mesh(new THREE.BoxGeometry(2.5,y-base,2.5),toon("#3b3d42"));p.position.set(x,(y+base)/2,z);g.add(p);}}
+    const car=(t)=>{const c=new THREE.Group();const x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;
+      const steps=[[-9,-3,0,11],[-3,3,2,13],[3,9,4,15]];
+      steps.forEach(([a,b,yb,yt])=>{const m=plainBox(a,b,yb,yt,-5.5,5.5,"#e07a2e",{t:.5});c.add(m);const w=plainBox(a+.6,b-.6,yt-6,yt-2.2,-5.6,5.6,"#f6efe0",{hull:false,mo:{}});w.material=toon("#f7e9c8",{emissive:C("#ffd27a"),emissiveIntensity:0});markNight(w.material);c.add(w);c.add(plainBox(a-.3,b+.3,yt,yt+1.2,-5.8,5.8,"#1f1f22",{hull:false}));c.add(plainBox(a,b,yb,yb+2,-5.7,5.7,"#1f1f22",{hull:false}));});
+      c.position.set(x,y+2,z); c.rotation.z=0; g.add(c);};
+    car(.28); car(.7);
+    // lower station arch
+    const st=new THREE.Group(); st.add(plainBox(-12,-8,0,22,-11,-7,"#e07a2e")); st.add(plainBox(-12,-8,0,22,7,11,"#e07a2e"));
+    st.add(plainBox(-13,-7,0,3,-12,12,"#2b2b2e",{hull:false}));
+    st.add(plainBox(-14,-6,22,30,-13,13,"#1f1f22"));
+    st.add(plainBox(-14.5,-5.5,30,32,-14,14,"#e07a2e"));
+    const arch=new THREE.Mesh(new THREE.TorusGeometry(7,1.2,6,16,Math.PI),toon("#f2e3c4")); arch.rotation.y=Math.PI/2; arch.position.set(-10,15,0); st.add(arch);
+    const sg=signPlane("ANGELS FLIGHT",22,4.5,"#ffd9a8","#1f1f22","800 150px Archivo, Arial"); sg.rotation.y=Math.PI/2; sg.position.set(-5.4,26,0); st.add(sg);
+    st.position.set(-30,0,z); g.add(st);
+    // upper station pavilion
+    const up=new THREE.Group(); up.add(plainBox(-10,10,0,16,-10,10,"#f2e3c4")); up.add(plainBox(-11,11,16,18,-11,11,"#e07a2e"));
+    const roof=new THREE.Mesh(new THREE.ConeGeometry(15,9,4),toon("#2b2b2e")); roof.rotation.y=Math.PI/4; roof.position.y=22.5; up.add(roof);
+    up.position.set(-358,y1-4,z); g.add(up);
+    return reg(id,g,yr);
+  }
+  funicular("af",-338,[1996,9999]);
+  funicular("af1901",-662,[1901,1969]);
+  // stair
+  (function(){const g=new THREE.Group();const n=34;for(let i=0;i<n;i++){const xa=-50-i*(290/n),xb=xa-290/n;const y=h(xb);g.add(plainBox(xb,xa,h(xa)-2,y+1,-328,-318,"#e2d6bf",{t:.4}));}
+    for(const z of [-328.5,-317.5]){for(let i=0;i<n;i+=3){const x=-50-i*(290/n);const p=new THREE.Mesh(new THREE.BoxGeometry(.5,4,.5),fenceMat);p.position.set(x,h(x)+3,z);g.add(p);}}
+    reg("stair",g,[1995,9999]);})();
+  // Metro portal
+  (function(){const g=new THREE.Group();g.add(plainBox(-96,-50,0,1.5,-50,-12,"#bfc3c8",{hull:false}));
+    [[-94,-48],[-52,-48],[-94,-14],[-52,-14]].forEach(([x,z])=>g.add(plainBox(x-1,x+1,1,14,z-1,z+1,"#4a4f57",{hull:false})));
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(50,1.2,42),new THREE.MeshStandardMaterial({color:C("#9fd2e8"),transparent:true,opacity:.75}));roof.position.set(-73,14.6,-31);g.add(roof);
+    g.add(plainBox(-73.5,-72.5,14,15.5,-52,-10,"#4a4f57",{hull:false}));
+    const py=plainBox(-104,-99,0,20,-16,-11,"#d9452f"); g.add(py); const m=signPlane("M",5,5,"#ffffff","#d9452f","800 700px Archivo, Arial"); m.position.set(-101.5,16,-10.9); g.add(m);
+    reg("metro",g,[1993,9999]);})();
+  // retaining wall with counterforts
+  (function(){const g=new THREE.Group();const st=makeFacade("ashlar");const len=190;const m=new THREE.Mesh(new THREE.BoxGeometry(6,24,len),facadeMat("ashlar",len/40,1));m.position.set(-114,11,-466);hull(m,6,24,len);g.add(m);
+    for(let z=-555;z<-375;z+=20) g.add(plainBox(-111,-106,-1,18,z-1.5,z+1.5,"#ab9d85",{t:.5}));
+    reg("wall",g,[1902,9999]);})();
+
+  /* ---------- historic buildings (pre-1963) ---------- */
+  reg("dunn",building({x0:-112,x1:-40,z0:-482,z1:-452,y0:-1,y1:74,style:"cream",floorH:13,bayW:12,base:{h:16,style:"store",bayW:15},cornice:"#f5ecd8",roof:"#7d7a75",tank:true}),[1913,1963]);
+  reg("steere",building({x0:-112,x1:-40,z0:-448,z1:-401,y0:-1,y1:62,style:"brickTan",floorH:13,bayW:12,base:{h:16,style:"storeTan",bayW:15},cornice:"#efe0c6",roof:"#7d7a75",hvac:1}),[1904,1963]);
+  reg("pembroke",building({x0:-112,x1:-40,z0:-397,z1:-352,y0:-1,y1:70,style:"brickRed",floorH:12,bayW:13,base:{h:15,style:"storeRed",bayW:15},cornice:"#efe0c6",roof:"#6f6a64",tank:true}),[1904,1963]);
+  [[-320,-272,46,"storeTan","brickTan"],[-268,-206,54,"storeRed","brickBrown"],[-202,-138,40,"store","sand"],[-134,-64,50,"storeRed","brickRed"],[-60,-6,36,"storeTan","buff"]].forEach(([z0,z1,ht,bs,s])=>reg("hillcom",building({x0:-100,x1:-40,z0,z1,y0:-1,y1:ht,style:s,floorH:12,bayW:12,base:{h:14,style:bs,bayW:15},cornice:"#efe0c6",roof:"#77736d",hvac:1}),[1895,1963]));
+  // Clay Street ribbon (pre-1963)
+  (function(){const x=-160,y=h(x)+1.2;const m=new THREE.Mesh(new THREE.BoxGeometry(30,2,700),toon("#9e958a"));m.position.set(x,y,-330);reg("clay",m,[1875,1963]);})();
+  // Olive St apartment hotels
+  [[-650,-575,58,"hotelWood"],[-560,-480,46,"victorianC"],[-460,-385,54,"hotelWood"],[-300,-225,62,"brickTan"],[-210,-140,48,"hotelWood"],[-120,-40,56,"buff"]].forEach(([z0,z1,ht,s])=>{
+    const g=building({x0:-336,x1:-276,z0,z1,y0:h(-276)-2,y1:70+ht,style:s,floorH:11,bayW:12,cornice:"#fbf3e6",roof:"#6e5a4e",
+      extra:(gg,top)=>{const p=new THREE.Mesh(new THREE.BoxGeometry(6,2,z1-z0-6),toon("#fbf3e6"));p.position.set(-339,82,(z0+z1)/2);gg.add(p);}});
+    reg("olive",g,[1885,1964]);});
+  // Victorian houses on the slope
+  function prism(w,hh,d){const s=new THREE.Shape();s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(0,hh);s.lineTo(-w/2,0);const g=new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return g;}
+  const vics=["victorianA","victorianB","victorianC","victorianD"], roofs=["#7a4b45","#4f5e6e","#6b5a4a","#5a4f6b"];
+  [[-245,-610],[-200,-560],[-250,-505],[-205,-450],[-248,-280],[-205,-235],[-250,-160],[-205,-110],[-240,-50],[-195,-300]].forEach(([x,z],i)=>{
+    const g=new THREE.Group(); const w=30,d=36,ht=28; const yb=h(x+w/2)-3, yt=h(x-w/2)+ht;
+    g.add(faceBox(x-w/2,x+w/2,yb,yt,z-d/2,z+d/2,vics[i%4],12,12,roofs[i%4]));
+    const r=new THREE.Mesh(prism(w+4,16,d+4),toon(roofs[i%4])); r.rotation.y=Math.PI/2; r.position.set(x,yt,z); hull(r,d+4,16,w+4,.8); g.add(r);
+    g.add(plainBox(x+w/2,x+w/2+8,h(x+w/2)-1,h(x+w/2)+10,z-d/2+4,z+d/2-4,"#fbf6ee",{t:.5}));
+    g.add(plainBox(x-6,x-2,yt+4,yt+18,z+6,z+10,"#8a5040",{t:.4}));
+    if(i%3===0){const tu=new THREE.Mesh(new THREE.CylinderGeometry(6,6,ht+6,8),makeFacadeSolid(vics[(i+1)%4]));tu.position.set(x+w/2-4,yb+(yt-yb+6)/2,z-d/2+2);g.add(tu);const cn=new THREE.Mesh(new THREE.ConeGeometry(7.5,12,8),toon(roofs[(i+1)%4]));cn.position.set(x+w/2-4,yt+3+6,z-d/2+2);g.add(cn);}
+    reg("olive",g,[1885,1964]);
+    tree("olive",x+18,h(x+18),z+22,.7,leafCols,[1885,1964]);
+  });
+  function makeFacadeSolid(name){return toon(STY[name].wall);}
+
+  /* ---------- historic resources & context ---------- */
+  // Grand Central Market (Homer Laughlin Bldg)
+  reg("gcm",building({x0:40,x1:330,z0:-560,z1:-300,y0:-1,y1:84,style:"cream",floorH:13,bayW:14,base:{h:18,style:"store",bayW:18},cornice:"#f8f1e1",parapet:"#eadfc8",roof:"#8b8780",hvac:5,
+    extra:(g,top)=>{const s=signPlane("GRAND CENTRAL MARKET",120,12,"#ff4a3d","#fff6e6","800 92px Archivo, Arial");s.rotation.y=-Math.PI/2;s.position.set(39.3,22,-430);g.add(s);
+      const s2=signPlane("GRAND CENTRAL MARKET",140,14,"#ff4a3d","#fff6e6","800 92px Archivo, Arial");s2.rotation.y=Math.PI/2;s2.position.set(330.7,24,-430);g.add(s2);}}),[1898,9999]);
+  // Million Dollar Theater
+  reg("mdt",building({x0:170,x1:330,z0:-655,z1:-565,y0:-1,y1:145,style:"sand",floorH:12,bayW:13,base:{h:22,style:"store",bayW:20},cornice:"#f3e6c9",roof:"#8b8780",tank:true,
+    extra:(g,top)=>{const orn=document.createElement("canvas");orn.width=256;orn.height=512;const o=orn.getContext("2d");o.fillStyle="#e9d3a8";o.fillRect(0,0,256,512);o.strokeStyle="#b48a52";o.lineWidth=5;for(let y=20;y<512;y+=46){for(let x=20;x<256;x+=54){o.beginPath();o.arc(x,y,14,0,Math.PI*2);o.stroke();o.beginPath();o.moveTo(x-20,y+20);o.quadraticCurveTo(x,y-4,x+20,y+20);o.stroke();}}
+      const t=new THREE.CanvasTexture(orn);t.encoding=THREE.sRGBEncoding;const p=new THREE.Mesh(new THREE.PlaneGeometry(60,90),toon("#ffffff",{map:t}));p.position.set(250,62,-655.6);p.rotation.y=Math.PI;g.add(p);
+      const b=signPlane("MILLION DOLLAR",8,60,"#fff3c4","#b2342a","800 92px Archivo, Arial",true);b.position.set(176,60,-660);b.rotation.y=Math.PI;g.add(b);}}),[1918,9999]);
+  // Hotel Clark
+  reg("clark",building({x0:40,x1:180,z0:95,z1:230,y0:-1,y1:172,style:"brickTan",floorH:12,bayW:13,base:{h:20,style:"store",bayW:18},cornice:"#f0e2c8",roof:"#8b8780",hvac:3,
+    extra:(g,top)=>{const s=signPlane("HOTEL CLARK",70,14,"#e8312a",null,"800 170px Archivo, Arial");s.position.set(110,top+12,95);s.rotation.y=Math.PI;g.add(s);[60,110,160].forEach(x=>g.add(plainBox(x-.6,x+.6,top,top+20,94,96,"#333",{hull:false})));}}),[1913,9999]);
+  // Subway Terminal Building
+  reg("stb",building({x0:-300,x1:-40,z0:90,z1:250,y0:-1,y1:166,style:"brickBrown",floorH:13,bayW:14,base:{h:30,style:"stone",floorH:15,bayW:18},trim:"#efe6d4",cornice:"#e6d6ba",roof:"#7e7770",hvac:4,tank:true}),[1926,9999]);
+  // Pershing Square Building
+  reg("psb",building({x0:40,x1:180,z0:460,z1:612,y0:-1,y1:170,style:"buff",floorH:12,bayW:13,base:{h:24,style:"store",bayW:18},cornice:"#f2e5cc",roof:"#8b8780",hvac:2,tank:true}),[1924,9999]);
+  // Title Guarantee & Trust (Art Deco, set-back crown)
+  reg("tgt",building({x0:-220,x1:-40,z0:470,z1:612,y0:-1,y1:150,style:"deco",floorH:13,bayW:12,base:{h:22,style:"stone",bayW:18},roof:"#a7a49c",
+    extra:(g,top)=>{g.add(faceBox(-175,-85,top,top+40,505,580,"deco",13,12,"#a7a49c"));g.add(faceBox(-150,-110,top+40,top+62,520,565,"deco",13,10,"#a7a49c"));
+      const sp=new THREE.Mesh(new THREE.ConeGeometry(14,30,4),toon("#ebe6da"));sp.rotation.y=Math.PI/4;sp.position.set(-130,top+77,542);g.add(sp);
+      [[-175,505],[-85,505],[-175,580],[-85,580]].forEach(([x,z])=>{const f=new THREE.Mesh(new THREE.ConeGeometry(3,14,4),toon("#ffffff"));f.position.set(x,top+47,z);g.add(f);});}}),[1930,9999]);
+  // California Plaza towers
+  reg("cp1",building({x0:-640,x1:-490,z0:-700,z1:-560,y0:95,y1:560,style:"calplaza",floorH:12,bayW:10,roof:"#b98a80",
+    extra:(g,top)=>{g.add(faceBox(-625,-505,560,578,-688,-572,"calplaza",12,10,"#b98a80"));}}),[1985,9999]);
+  reg("cp2",building({x0:-650,x1:-490,z0:-330,z1:-170,y0:95,y1:700,style:"calplaza",floorH:12,bayW:10,roof:"#b98a80",
+    extra:(g,top)=>{const cyl=new THREE.Mesh(new THREE.CylinderGeometry(80,80,160,24,1,false,0,Math.PI),[facadeMat("calplaza",12,2),toon("#b98a80"),toon("#b98a80")]);cyl.rotation.z=Math.PI/2;cyl.rotation.y=Math.PI/2;cyl.scale.set(.62,1,1);cyl.position.set(-570,700,-250);g.add(cyl);}}),[1992,9999]);
+  // context (non-interactive)
+  const ctx=(o,yr)=>reg(null,building(o),yr);
+  reg("angelus",building({x0:-320,x1:-200,z0:-1080,z1:-800,y0:-1,y1:195,style:"modern",floorH:11,bayW:12,roof:"#a3a7ab"}),[1982,9999]);
+  reg("angelus",building({x0:-170,x1:-50,z0:-1000,z1:-800,y0:-1,y1:150,style:"modern",floorH:11,bayW:12,roof:"#a3a7ab"}),[1982,9999]);
+  ctx({x0:40,x1:330,z0:-1000,z1:-750,y0:-1,y1:120,style:"modern",floorH:12,bayW:14,roof:"#9a9da2",hvac:4});
+  ctx({x0:190,x1:330,z0:95,z1:420,y0:-1,y1:96,style:"buff",floorH:12,bayW:13,base:{h:18,style:"storeTan",bayW:18},cornice:"#f2e5cc",roof:"#8b8780",hvac:2});
+  ctx({x0:40,x1:180,z0:250,z1:440,y0:-1,y1:78,style:"brickTan",floorH:12,bayW:13,base:{h:16,style:"store",bayW:18},cornice:"#f0e2c8",roof:"#8b8780"});
+  ctx({x0:-780,x1:-410,z0:95,z1:420,y0:-1,y1:66,style:"parking",floorH:11,bayW:20,roof:"#8d9096"});
+  ctx({x0:-300,x1:-40,z0:270,z1:440,y0:-1,y1:60,style:"parking",floorH:11,bayW:20,roof:"#8d9096"});
+  ctx({x0:-780,x1:-410,z0:470,z1:612,y0:-1,y1:260,style:"modern2",floorH:12,bayW:12,roof:"#9a9da2",hvac:3});
+  ctx({x0:200,x1:330,z0:-740,z1:-670,y0:-1,y1:62,style:"brickRed",floorH:12,bayW:13,base:{h:15,style:"storeRed"},roof:"#77736d"},[1890,9999]);
+  [[430,560,-660,-470,96,"sand"],[580,720,-660,-470,70,"brickTan"],[430,560,-450,-250,120,"cream"],[580,720,-450,-250,84,"buff"],[430,560,-230,-20,140,"brickBrown"],[580,720,-230,-20,90,"sand"],[430,560,95,300,110,"buff"],[580,720,95,300,150,"modern"]].forEach(([x0,x1,z0,z1,ht,s])=>ctx({x0,x1,z0,z1,y0:-1,y1:ht,style:s,floorH:12,bayW:13,base:{h:16,style:"store",bayW:18},cornice:"#efe6d4",roof:"#8b8780",hvac:2}));
+  // distant skyline
+  [[-1300,-500,620],[-1150,-900,820],[-1500,-150,520],[-1250,250,700],[-1700,-700,940],[-1000,-1300,560],[-1550,550,480]].forEach(([x,z,ht])=>ctx({x0:x-70,x1:x+70,z0:z-70,z1:z+70,y0:-1,y1:ht,style:rnd()<.5?"modern2":"calplaza",floorH:12,bayW:10,roof:"#9a9da2"}));
+
+  /* ---------- Angels Landing proposal ---------- */
+  const ghostMat=new THREE.MeshStandardMaterial({color:C("#9fd8ff"),transparent:true,opacity:.42,depthWrite:false,emissive:C("#4aa8ff"),emissiveIntensity:.2});
+  function ghost(id,x0,x1,z0,z1,y0,y1){const m=new THREE.Mesh(new THREE.BoxGeometry(x1-x0,y1-y0,z1-z0),ghostMat);m.position.set((x0+x1)/2,(y0+y1)/2,(z0+z1)/2);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:C("#4aa8ff")}));m.add(e);
+    for(let y=y0+14;y<y1;y+=14){const r=new THREE.Mesh(new THREE.BoxGeometry(x1-x0+.4,.6,z1-z0+.4),new THREE.MeshBasicMaterial({color:C("#cfeaff"),transparent:true,opacity:.35,depthWrite:false}));r.position.set(0,y-(y0+y1)/2,0);m.add(r);}
+    return reg(id,m);}
+  ghost("twA",-235,-120,-312,-205,h(-120),854); ghost("twA",-215,-140,-295,-222,854,880);
+  ghost("twB",-305,-205,-160,-55,h(-205),560);
+  ghost("twA",-320,-60,-318,-20,h(-60),h(-60)+70);
+
+
+  /* ---------- street life: cars, lamps, people ---------- */
+  function aoDecalTex(){const c=document.createElement("canvas");c.width=c.height=128;const g=c.getContext("2d");g.filter="blur(10px)";g.fillStyle="#000";g.fillRect(22,22,84,84);const t=new THREE.CanvasTexture(c);return t;}
+  var _aoT; function aoDecal(x0,x1,z0,z1,y){_aoT=_aoT||aoDecalTex();const pad=14;const m=new THREE.Mesh(new THREE.PlaneGeometry(x1-x0+pad*2.4,z1-z0+pad*2.4),new THREE.MeshBasicMaterial({color:0x000000,alphaMap:_aoT,transparent:true,opacity:.38,depthWrite:false}));m.rotation.x=-Math.PI/2;m.position.set((x0+x1)/2,y,(z0+z1)/2);m.raycast=()=>{};m.renderOrder=1;return m;}
+  const carCols=["#d94a3a","#f2f2f2","#2f6fb5","#f2c14e","#3b8f6a","#22262c","#c8ccd2","#e57a2e","#7d8a96","#f2f2f2","#20242a"];
+  const glassDark=toon("#2a3440",{roughness:.25,metalness:.3}), tire=toon("#1b1d20");
+  function makeCar(col,kind){const g=new THREE.Group();const L=kind==="bus"?40:kind==="truck"?24:15, W=kind==="bus"?8.5:7, H=kind==="bus"?9:4.2;
+    g.add(plainBox(-W/2,W/2,1.3,1.3+H,-L/2,L/2,col,{mo:{roughness:.45,metalness:.15}}));
+    if(kind==="bus"){g.add(plainBox(-W/2-.1,W/2+.1,5,8,-L/2+2,L/2-3,"",{mat:glassDark}));}
+    else if(kind==="truck"){g.add(plainBox(-W/2,W/2,1.3,9,L/2-7,L/2,col));g.add(plainBox(-W/2-.1,W/2+.1,5.5,8.5,L/2-6.5,L/2+.1,"",{mat:glassDark}));g.children[0].scale.y=1;g.add(plainBox(-W/2,W/2,5.5,11,-L/2,L/2-8,"#e9e9e6"));}
+    else{g.add(plainBox(-W/2+.4,W/2-.4,1.3+H,1.3+H+3.2,-L/2+3.5,L/2-4,"",{mat:glassDark}));g.add(plainBox(-W/2+.6,W/2-.6,1.3+H+3.2,1.3+H+3.6,-L/2+4,L/2-4.5,col));}
+    [[-W/2,-L/2+3],[W/2,-L/2+3],[-W/2,L/2-3],[W/2,L/2-3]].forEach(([x,z])=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,1.2,12),tire);w.rotation.z=Math.PI/2;w.position.set(x,1.5,z);g.add(w);});
+    const lt=toon("#fff6d8",{emissive:C("#ffe7a8"),emissiveIntensity:0});markNight(lt);g.add(plainBox(-W/2+.6,-W/2+2,2.6,3.6,L/2-.1,L/2+.3,"",{mat:lt}));g.add(plainBox(W/2-2,W/2-.6,2.6,3.6,L/2-.1,L/2+.3,"",{mat:lt}));
+    g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.raycast=()=>{};}});return g;}
+  const cars=[];
+  const lanes=[{ax:"z",c:-20,d:1,a:-1400,b:1400},{ax:"z",c:-8,d:1,a:-1400,b:1400},{ax:"z",c:8,d:-1,a:-1400,b:1400},{ax:"z",c:20,d:-1,a:-1400,b:1400},
+    {ax:"z",c:366,d:1,a:-1400,b:1400},{ax:"z",c:394,d:-1,a:-1400,b:1400},
+    {ax:"x",c:26,d:-1,a:-1400,b:1000},{ax:"x",c:54,d:1,a:-1400,b:1000},{ax:"x",c:-714,d:-1,a:-330,b:1000},{ax:"x",c:-686,d:1,a:-330,b:1000},{ax:"x",c:646,d:-1,a:-1400,b:1000},{ax:"x",c:674,d:1,a:-1400,b:1000}];
+  lanes.forEach(l=>{const n=Math.round((l.b-l.a)/260);for(let i=0;i<n;i++){const r=rnd();const kind=r<.06?"bus":r<.16?"truck":"car";const car=makeCar(carCols[Math.floor(rnd()*carCols.length)],kind);
+    const p=l.a+(l.b-l.a)*(i+rnd()*.6)/n; car.userData={l,p,v:(kind==="bus"?18:26)+rnd()*14};
+    car.rotation.y=l.ax==="z"?(l.d>0?0:Math.PI):(l.d>0?Math.PI/2:-Math.PI/2); scene.add(car); cars.push(car);}});
+  function placeCars(dt){cars.forEach(c=>{const u=c.userData,l=u.l;u.p+=l.d*u.v*dt;if(u.p>l.b)u.p=l.a;if(u.p<l.a)u.p=l.b;if(l.ax==="z")c.position.set(l.c,-0.8,u.p);else c.position.set(u.p,-0.8,l.c);});}
+  placeCars(0);
+  // lamps and traffic lights
+  const poleMat=toon("#3c4047",{roughness:.6,metalness:.3});
+  function lamp(x,z,ry){const g=new THREE.Group();const p=new THREE.Mesh(new THREE.CylinderGeometry(.35,.5,24,8),poleMat);p.position.y=12;g.add(p);const arm=new THREE.Mesh(new THREE.BoxGeometry(7,.5,.5),poleMat);arm.position.set(3.5,23.5,0);g.add(arm);
+    const hm=toon("#f4f1e6",{emissive:C("#ffd98a"),emissiveIntensity:0});markNight(hm);const hd=new THREE.Mesh(new THREE.BoxGeometry(3,1,1.6),hm);hd.position.set(7,23,0);g.add(hd);
+    g.position.set(x,-0.3,z);g.rotation.y=ry;g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.raycast=()=>{};}});scene.add(g);}
+  for(let z=-1300;z<1350;z+=95){if(Math.abs(z-40)<40||Math.abs(z+700)<40||Math.abs(z-660)<40)continue;lamp(-36,z,Math.PI);lamp(36,z,0);lamp(346,z,Math.PI);lamp(414,z,0);}
+  for(let x=-330;x<1000;x+=95){if(Math.abs(x)<45||Math.abs(x-380)<45)continue;lamp(x,6,Math.PI/2);lamp(x,74,-Math.PI/2);lamp(x,632,Math.PI/2);lamp(x,694,-Math.PI/2);}
+  function signal(x,z,ry){const g=new THREE.Group();const p=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,18,8),toon("#d8b234"));p.position.y=9;g.add(p);const arm=new THREE.Mesh(new THREE.BoxGeometry(18,.6,.6),toon("#d8b234"));arm.position.set(9,17,0);g.add(arm);
+    const box=new THREE.Mesh(new THREE.BoxGeometry(1.6,4.5,1.6),toon("#2a2c30"));box.position.set(14,15,0);g.add(box);g.position.set(x,-.3,z);g.rotation.y=ry;g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.raycast=()=>{};}});scene.add(g);}
+  [[0,40],[380,40],[0,-700],[380,-700],[0,660],[380,660]].forEach(([cx,cz])=>{signal(cx-36,cz-34,0);signal(cx+36,cz+34,Math.PI);signal(cx+36,cz-34,-Math.PI/2);signal(cx-36,cz+34,Math.PI/2);
+    for(const [dx,dz,al] of [[0,-34,true],[0,34,true],[-34,0,false],[34,0,false]]) crosswalk(cx+dx,cz+dz,al,52);});
+  // people on sidewalks
+  const clothes=["#d9534f","#3a6ea5","#f0ad4e","#5cb85c","#ffffff","#2b2b2b","#8e6c8a","#e8e0d0"],skin=["#f1c9a5","#c68e65","#8d5a3b","#e6b590"];
+  for(let i=0;i<140;i++){let x,z;const r=rnd();
+    if(r<.3){x=rnd()<.5?-34-rnd()*4:34+rnd()*4;z=-1200+rnd()*2400;}else if(r<.5){x=rnd()<.5?346-rnd()*4:414+rnd()*4;z=-1200+rnd()*2400;}
+    else if(r<.8){z=rnd()<.5?6-rnd()*4:74+rnd()*4;x=-330+rnd()*1300;}else{x=-330+rnd()*290;z=720+rnd()*360;}
+    const g=new THREE.Group();const b=new THREE.Mesh(new THREE.CylinderGeometry(.9,.8,4.2,8),toon(clothes[Math.floor(rnd()*clothes.length)]));b.position.y=2.1;g.add(b);
+    const hd=new THREE.Mesh(new THREE.SphereGeometry(.75,10,8),toon(skin[Math.floor(rnd()*skin.length)]));hd.position.y=5;g.add(hd);g.position.set(x,-0.3,z);g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.raycast=()=>{};}});scene.add(g);}
+
+  /* ---------- sky, clouds, stars ---------- */
+  const skyC=document.createElement("canvas");skyC.width=8;skyC.height=256;const skyT=new THREE.CanvasTexture(skyC);skyT.encoding=THREE.sRGBEncoding;
+  const sky=new THREE.Mesh(new THREE.SphereGeometry(14000,32,16),new THREE.MeshBasicMaterial({map:skyT,side:THREE.BackSide,fog:false,depthWrite:false}));scene.add(sky);
+  function paintSky(dark){const g=skyC.getContext("2d");const gr=g.createLinearGradient(0,0,0,256);
+    if(dark){gr.addColorStop(0,"#0b1630");gr.addColorStop(.38,"#24305e");gr.addColorStop(.5,"#e08a6a");gr.addColorStop(.56,"#3a3550");gr.addColorStop(1,"#1a1c26");}
+    else{gr.addColorStop(0,"#b9cadb");gr.addColorStop(.4,"#dbe4ec");gr.addColorStop(.5,"#eef2f5");gr.addColorStop(1,"#c4c8c8");}
+    g.fillStyle=gr;g.fillRect(0,0,8,256);skyT.needsUpdate=true;}
+  const clouds=[];
+  function cloudTex(){const c=document.createElement("canvas");c.width=512;c.height=256;const g=c.getContext("2d");
+    const blobs=[[140,160,70],[230,130,90],[330,150,75],[400,170,55],[90,180,45],[270,180,80]];
+    g.fillStyle="#cfdcef";blobs.forEach(([x,y,r])=>{g.beginPath();g.arc(x,y+14,r,0,7);g.fill();});
+    g.fillStyle="#ffffff";blobs.forEach(([x,y,r])=>{g.beginPath();g.arc(x,y,r,0,7);g.fill();});
+    g.globalCompositeOperation="destination-in";g.fillRect(0,0,512,214);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;}
+  const ct=cloudTex();
+  for(let i=0;i<16;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:ct,fog:false,transparent:true,depthWrite:false}));const a=rnd()*Math.PI*2,r=4500+rnd()*4500;s.position.set(Math.cos(a)*r,1400+rnd()*1600,Math.sin(a)*r);const sc=1400+rnd()*1500;s.scale.set(sc,sc/2,1);scene.add(s);clouds.push(s);}
+  const starG=new THREE.BufferGeometry();const sp=[];for(let i=0;i<500;i++){const a=rnd()*Math.PI*2,e=.25+rnd()*1.2;sp.push(Math.cos(a)*Math.cos(e)*13000,Math.sin(e)*13000,Math.sin(a)*Math.cos(e)*13000);}
+  starG.setAttribute("position",new THREE.Float32BufferAttribute(sp,3));const stars=new THREE.Points(starG,new THREE.PointsMaterial({color:0xffffff,size:2,sizeAttenuation:false,fog:false,transparent:true,opacity:.85}));scene.add(stars);
+
+  // street labels
+  const labels=[];
+  function label(text,x,y,z,s=1){const c=document.createElement("canvas");c.width=512;c.height=96;const tex=new THREE.CanvasTexture(c);tex.encoding=THREE.sRGBEncoding;const spr=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false,fog:false}));spr.scale.set(200*s,38*s,1);spr.position.set(x,y,z);spr.renderOrder=10;scene.add(spr);labels.push({c,tex,text});}
+  function drawLabels(dark){labels.forEach(({c,tex,text})=>{const g=c.getContext("2d");g.clearRect(0,0,512,96);g.font="700 44px 'JetBrains Mono', monospace";g.textAlign="center";g.textBaseline="middle";const w=g.measureText(text).width+40;g.fillStyle=dark?"rgba(20,24,34,.75)":"rgba(255,255,255,.8)";const x=256-w/2;g.beginPath();g.roundRect?g.roundRect(x,18,w,60,30):g.rect(x,18,w,60);g.fill();g.fillStyle=dark?"#e8edf3":"#26303d";g.fillText(text,256,50);tex.needsUpdate=true;});}
+  label("HILL ST",0,14,760);label("4TH ST",620,14,40);label("3RD ST",620,14,-700);label("5TH ST",620,14,660);label("OLIVE ST",-370,90,330);label("BROADWAY",380,14,760);label("GRAND AVE",-820,110,-300);
+
+  /* ---------- quest marker ---------- */
+  const marker=new THREE.Group();
+  const gem=new THREE.Mesh(new THREE.OctahedronGeometry(12,0),new THREE.MeshBasicMaterial({color:C("#ffd25a"),fog:false}));gem.scale.y=1.5;
+  
+  marker.add(gem);const ring=new THREE.Mesh(new THREE.RingGeometry(16,20,32),new THREE.MeshBasicMaterial({color:C("#ffd25a"),transparent:true,opacity:.6,side:THREE.DoubleSide,fog:false}));ring.rotation.x=-Math.PI/2;ring.position.y=-26;marker.add(ring);
+  scene.add(marker);marker.traverse(o=>o.raycast=()=>{});
+  let markerY=0;
+
+  /* ---------- visibility, highlight, theme ---------- */
+  const inYr=o=>!o.userData.yr||(year>=o.userData.yr[0]&&year<o.userData.yr[1]);
+  window.applyVisibility=function(){
+    for(const id in parts){const o=BYID[id];const v=o?visibleNow(o):true;parts[id].forEach(m=>m.visible=v&&inYr(m));}
+    siteSlab.material.userData.base.copy(C(year<1963?"#c9b58e":year<1984?"#b49b74":"#86bb5e"));
+    northMat.color.copy(C(year<1963?"#c9b58e":year<1996?"#b49b74":"#d4cdbd"));
+    placePins(); placeMarker();
+  };
+  let hover=null;
+  /* stakeholder pins */
+  const pins=[];
+  function pinTex(cat,n){const c=document.createElement("canvas");c.width=c.height=128;const g=c.getContext("2d");const col=catColor(cat);
+    g.fillStyle="rgba(0,0,0,.25)";g.beginPath();g.ellipse(64,120,18,5,0,0,7);g.fill();
+    g.fillStyle=col;g.beginPath();g.arc(64,52,40,0,7);g.fill();g.beginPath();g.moveTo(40,80);g.lineTo(64,116);g.lineTo(88,80);g.fill();
+    g.fillStyle="#fff";g.beginPath();g.arc(64,52,30,0,7);g.fill();g.fillStyle=col;g.font="800 38px 'JetBrains Mono', monospace";g.textAlign="center";g.textBaseline="middle";g.fillText(CAT[cat].glyph,64,54);
+    g.fillStyle="#1c2430";g.beginPath();g.arc(98,22,16,0,7);g.fill();g.fillStyle="#fff";g.font="700 20px 'JetBrains Mono', monospace";g.fillText(String(n),98,23);
+    const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;return t;}
+  OBJ.forEach(o=>{const byCat={};SH.forEach(s=>{if(s.objs.includes(o.id))(byCat[s.cat]=byCat[s.cat]||[]).push(s);});
+    Object.keys(byCat).forEach((cat,i,arr)=>{const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:pinTex(cat,byCat[cat].length),depthTest:false,transparent:true,fog:false}));
+      sp.scale.set(34,34,1);sp.renderOrder=20;sp.userData={pid:o.id,cat,slot:i-(arr.length-1)/2};sp.visible=false;scene.add(sp);pins.push(sp);pickables.push(sp);});});
+  function placePins(){const st=window.shState&&shState();pins.forEach(p=>{const o=BYID[p.userData.pid];const on=!!st&&visibleNow(o)&&(shFilter==="all"||shFilter===p.userData.cat);
+      if(!on){p.visible=false;return;}const b=bboxOf(p.userData.pid);if(b.isEmpty()){p.visible=false;return;}const c=b.getCenter(new THREE.Vector3());
+      p.position.set(c.x+p.userData.slot*38,b.max.y+(p.userData.pid==="site"?120:30),c.z);p.visible=true;
+      const hl=st&&st.ids.size&&st.ids.has(p.userData.pid);p.material.opacity=st.ids.size&&!hl?.45:1;p.scale.setScalar(hl?44:34);});}
+  window.retintPins=()=>pins.forEach(p=>{p.material.map=pinTex(p.userData.cat,SH.filter(s=>s.cat===p.userData.cat&&s.objs.includes(p.userData.pid)).length);p.material.needsUpdate=true;});
+  function bboxOf(id){const b=new THREE.Box3();(parts[id]||[]).forEach(m=>{if(m.visible)b.expandByObject(m);});return b;}
+  function placeMarker(){const st=window.shState&&shState();const tgt=st?st.marker:selected;if(!tgt){marker.visible=false;return;}const b=bboxOf(tgt);if(b.isEmpty()){marker.visible=false;return;}marker.visible=true;const c=b.getCenter(new THREE.Vector3());markerY=b.max.y+40;marker.position.set(c.x,markerY,c.z);}
+  const accC=new THREE.Color();
+  const tintC=new THREE.Color();
+  window.repaint=function(){accC.copy(C(css('--accent')));const st=window.shState&&shState();for(const id in parts){if(id==='_ctx')continue;let k=id===selected?.5:id===hover?.25:0;let col=accC;
+      if(st){k=id===hover?.22:0;if(st.ids.has(id)){k=.5;if(st.color){tintC.copy(C(st.color));col=tintC;}}}
+      const useCol=col;parts[id].forEach(ob=>ob.traverse(m=>{if(!m.isMesh)return;(Array.isArray(m.material)?m.material:[m.material]).forEach(mt=>{if(mt.userData&&mt.userData.base)mt.color.copy(mt.userData.base).lerp(useCol,k);});}));}placePins();placeMarker();};
+  function retheme(){
+    const dark=css("--is-dark")==="1";
+    paintSky(dark); drawLabels(dark); signDraws.forEach(f=>f());
+    scene.fog=new THREE.Fog(C(dark?"#2a2c3e":"#e4e9ee"),3800,12000);
+    hemi.intensity=dark?.35:.7; hemi.color.copy(C(dark?"#7f8fd0":"#ffffff")); hemi.groundColor.copy(C(dark?"#2a2230":"#9aa7b8"));
+    sun.intensity=dark?.5:1.55; sun.color.copy(C(dark?"#ff9a6a":"#fff1dc")); sun.position.set(dark?-1200:1000,dark?500:1700,dark?300:700);
+    scene.traverse(o=>{if(o.isMesh)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(m.userData&&m.userData.night)m.emissiveIntensity=dark?1.2:0;});});
+    groundMat.color.copy(C(dark?"#3c4046":"#bfc3c2"));
+    if(window.retintPins) retintPins();
+    stars.visible=dark; clouds.forEach(s=>s.visible=false);
+    repaint();
+  }
+  retheme();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",retheme);
+  new MutationObserver(retheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+  document.fonts&&document.fonts.ready.then(retheme);
+
+  /* ---------- picking ---------- */
+  const ray=new THREE.Raycaster(),ptr=new THREE.Vector2(),tip=$("#tip");let down=null;
+  function pick(ev){const r=canvas.getBoundingClientRect();ptr.set(((ev.clientX-r.left)/r.width)*2-1,-((ev.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
+    const vis=pickables.filter(m=>{let o=m;while(o){if(!o.visible)return false;o=o.parent;}return true;});const ph=ray.intersectObjects(vis.filter(m=>m.isSprite),false);if(ph.length)return ph[0].object.userData.pid;
+    const hits=ray.intersectObjects(vis,false);for(const hh of hits){if(hh.object.userData.pid)return hh.object.userData.pid;}return null;}
+  canvas.addEventListener("pointermove",ev=>{if(ev.pointerType!=="mouse"||ev.buttons)return;const id=pick(ev);if(id!==hover){hover=id;repaint();}canvas.classList.toggle("hovering",!!id);
+    if(id){const r=canvas.getBoundingClientRect();tip.hidden=false;tip.textContent=BYID[id].name;tip.style.left=(ev.clientX-r.left)+"px";tip.style.top=(ev.clientY-r.top)+"px";}else tip.hidden=true;});
+  canvas.addEventListener("pointerleave",()=>{hover=null;tip.hidden=true;repaint();});
+  canvas.addEventListener("pointerdown",ev=>{down=[ev.clientX,ev.clientY];});
+  canvas.addEventListener("pointerup",ev=>{if(!down)return;const d=Math.hypot(ev.clientX-down[0],ev.clientY-down[1]);down=null;if(d<5){const id=pick(ev);if(id)select(id,false);}});
+
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;let goal=null;
+  window.focusObj=function(id,move){repaint();if(!move)return;const b=bboxOf(id);if(b.isEmpty())return;const c=b.getCenter(new THREE.Vector3());c.y=Math.min(c.y,140);goal=c;if(reduce){controls.target.copy(goal);goal=null;}};
+
+  function resize(){const w=canvas.clientWidth,hh=canvas.clientHeight;if(!w||!hh)return;renderer.setSize(w,hh,false);cam.aspect=w/hh;cam.updateProjectionMatrix();}
+  new ResizeObserver(resize).observe(canvas);resize();
+  const clock=new THREE.Clock();let t=0;
+  (function loop(){requestAnimationFrame(loop);
+    const dt=Math.min(clock.getDelta(),.05); t+=dt; if(!reduce) placeCars(dt);
+    if(goal){controls.target.lerp(goal,.08);if(controls.target.distanceTo(goal)<1)goal=null;}
+    if(marker.visible&&!reduce){gem.rotation.y=t*1.6;marker.position.y=markerY+Math.sin(t*2.2)*5;ring.scale.setScalar(1+.15*Math.sin(t*2.2));}
+    controls.update();renderer.render(scene,cam);})();
+  applyVisibility();repaint();
+})();
+setYear(2026);
+</script>
+
+</body>
+</html>
